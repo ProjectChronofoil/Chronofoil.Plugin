@@ -1,0 +1,94 @@
+name: Create Release
+
+on:
+  push:
+    tags-ignore:
+      - testing_*
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.CFTOKEN }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.x.x'
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Download Dalamud
+        run: |
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
+          Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
+      - name: Build
+        run: |
+          $ver = '${{ github.ref_name }}'
+          invoke-expression 'dotnet build --no-restore --configuration Release --nologo -p:PluginVersion=$ver'
+      - name: Archive
+        run: Compress-Archive -Path src/bin/Release/* -DestinationPath Chronofoil.Plugin.zip
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          path: |
+            ./src/bin/Release/*
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Chronofoil.Plugin ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./src/bin/Release/Chronofoil.Plugin/latest.zip
+          asset_name: Chronofoil.Plugin.zip
+          asset_content_type: application/zip
+
+      - name: Write out repo.json
+        run: |
+          $plugin_json_path = './src/bin/Release/Chronofoil.Plugin.json'
+          $base_path = './repo_base.json'
+          $out_path = './repo.json'
+          
+          $plugin_json = Get-Content -Raw $plugin_json_path | ConvertFrom-Json
+          $ver = $plugin_json.AssemblyVersion
+          $json = Get-Content -Raw $base_path | ConvertFrom-Json
+          
+          $json[0].Author = $plugin_json.Author
+          $json[0].Name = $plugin_json.Name
+          $json[0].InternalName = $plugin_json.InternalName
+          $json[0].AssemblyVersion = $ver
+          $json[0].TestingAssemblyVersion = $ver
+          $json[0].ApplicableVersion = $plugin_json.ApplicableVersion
+          $json[0].Punchline = $plugin_json.Punchline
+          $json[0].Description = $plugin_json.Description
+          $json[0].DalamudApiLevel = $plugin_json.DalamudApiLevel
+          $json[0].RepoUrl = $plugin_json.RepoUrl
+          $json[0].DownloadLinkInstall = $json.DownloadLinkInstall -replace '[^/]+/Chronofoil.Plugin.zip',"$ver/Chronofoil.Plugin.zip"
+          $json[0].DownloadLinkTesting = $json.DownloadLinkTesting -replace '[^/]+/Chronofoil.Plugin.zip',"$ver/Chronofoil.Plugin.zip"
+          $json[0].DownloadLinkUpdate = $json.DownloadLinkUpdate -replace '[^/]+/Chronofoil.Plugin.zip',"$ver/Chronofoil.Plugin.zip"
+          
+          $content = $json | ConvertTo-Json -AsArray
+          set-content -Path $out_path -Value $content
+
+      - name: Commit repo.json
+        run: |
+          git config --global user.name "Actions User"
+          git config --global user.email "actions@github.com"
+          git fetch origin main
+          git branch -f main ${{ github.sha }}
+          git checkout main
+          git add repo.json
+          git commit -m "[CI] Updating repo.json for ${{ github.ref_name }}" || true
+          git push origin main

@@ -1,0 +1,12 @@
+name: Chronofoil
+internal_name: Chronofoil.Plugin
+author: perchbird
+punchline: Opt-in Crowdsourced packet capturing tool
+applicable_version: 2024.04.23.0000.0000
+description: |-
+  Chronofoil is a plugin that allows you to capture in-game packets for analysis later.
+  It also allows you to upload a censored version of these captures to a central repository for
+  preservation and analysis. Privacy controls are at the center of Chronofoil, which is why it
+  requires two levels of user opt-in, has minimum delays on releasing any submitted user info,
+  and allows users to delete their submitted data at any time.
+repo_url: https://github.com/ProjectChronofoil/Chronofoil.Plugin

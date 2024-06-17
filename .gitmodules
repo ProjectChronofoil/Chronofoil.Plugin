@@ -1,0 +1,6 @@
+[submodule "deps/Chronofoil.CaptureFile"]
+	path = deps/Chronofoil.CaptureFile
+	url = https://github.com/ProjectChronofoil/Chronofoil.CaptureFile.git
+[submodule "deps/Chronofoil.Common"]
+	path = deps/Chronofoil.Common
+	url = https://github.com/ProjectChronofoil/Chronofoil.Common.git

@@ -1,0 +1,22 @@
+[
+  {
+    "Author": "",
+    "Name": "",
+    "Punchline": "",
+    "Description": "",
+    "InternalName": "",
+    "AssemblyVersion": "",
+    "TestingAssemblyVersion": "",
+    "RepoUrl": "",
+    "ApplicableVersion": "",
+    "DalamudApiLevel": 9,
+    "IsHide": "False",
+    "IsTestingExclusive": "False",
+    "DownloadCount": 0,
+    "LastUpdate": 0,
+    "DownloadLinkInstall": "https://github.com/ProjectChronofoil/Chronofoil.Plugin/releases/download/0.0.0.0/Chronofoil.Plugin.zip",
+    "DownloadLinkTesting": "https://github.com/ProjectChronofoil/Chronofoil.Plugin/releases/download/0.0.0.0/Chronofoil.Plugin.zip",
+    "DownloadLinkUpdate": "https://github.com/ProjectChronofoil/Chronofoil.Plugin/releases/download/0.0.0.0/Chronofoil.Plugin.zip",
+    "IconUrl": "https://raw.githubusercontent.com/ProjectChronofoil/Chronofoil.Plugin/main/src/Data/icon_small.png"
+  }
+]

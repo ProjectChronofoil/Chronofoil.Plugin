@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chronofoil.Plugin", "src\Chronofoil.Plugin.csproj", "{B7BF53B9-7A92-4609-A130-57666A21F7CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chronofoil.CaptureFile", "deps\Chronofoil.CaptureFile\src\Chronofoil.CaptureFile.csproj", "{618530C9-B3DB-4B1F-B1A3-E4F67F07D275}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chronofoil.Common", "deps\Chronofoil.Common\src\Chronofoil.Common.csproj", "{68EC181F-77DD-4315-95D7-BAA55E8669A0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7BF53B9-7A92-4609-A130-57666A21F7CF}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{B7BF53B9-7A92-4609-A130-57666A21F7CF}.Debug|Any CPU.Build.0 = Debug|x64
+		{B7BF53B9-7A92-4609-A130-57666A21F7CF}.Release|Any CPU.ActiveCfg = Release|x64
+		{B7BF53B9-7A92-4609-A130-57666A21F7CF}.Release|Any CPU.Build.0 = Release|x64
+		{618530C9-B3DB-4B1F-B1A3-E4F67F07D275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{618530C9-B3DB-4B1F-B1A3-E4F67F07D275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{618530C9-B3DB-4B1F-B1A3-E4F67F07D275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{618530C9-B3DB-4B1F-B1A3-E4F67F07D275}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68EC181F-77DD-4315-95D7-BAA55E8669A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68EC181F-77DD-4315-95D7-BAA55E8669A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68EC181F-77DD-4315-95D7-BAA55E8669A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68EC181F-77DD-4315-95D7-BAA55E8669A0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
