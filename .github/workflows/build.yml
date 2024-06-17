@@ -30,5 +30,4 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.1
         with:
-          path: |
-            ./src/bin/Release/*
+          path: ./src/bin/Release/Chronofoil.Plugin/latest.zip
