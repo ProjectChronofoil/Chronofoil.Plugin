@@ -12,6 +12,7 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 0;
 
     public string StorageDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "chronofoil");
+    public string ApiEndpoint { get; set; } = "https://cf.perchbird.dev/api";
 
     public bool EnableContext { get; set; }
     public bool EnableUpload { get; set; }
@@ -29,7 +30,7 @@ public class Configuration : IPluginConfiguration
     public int PublicTimeValue { get; set; } = 1;
     public TimeSpanIdentifier PublicTimeSpan { get; set; } = TimeSpanIdentifier.Months;
     public bool PublicWhenEos { get; set; } = true;
-    
+
     public bool NotificationsEnabled { get; set; }
     public bool CaptureBeginNotificationsEnabled { get; set; }
     public bool CaptureEndNotificationsEnabled { get; set; }

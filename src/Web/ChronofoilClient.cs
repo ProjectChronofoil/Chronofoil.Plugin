@@ -15,26 +15,26 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Chronofoil.Web;
 
-public class ChronofoilClient
-{
-    private const string Endpoint = "https://cf.perchbird.dev/api";
-    private const string RegisterEndpoint = $"{Endpoint}/register/discord";
-    private const string LoginEndpoint = $"{Endpoint}/login/discord";
-    private const string RefreshEndpoint = $"{Endpoint}/token/refresh";
-    private const string TosAcceptEndpoint = $"{Endpoint}/tos/accept";
-    
-    private const string UploadEndpoint = $"{Endpoint}/capture/upload";
-    private const string DeleteEndpoint = $"{Endpoint}/capture/delete";
-    private const string CaptureListEndpoint = $"{Endpoint}/capture/list";
-    
-    private const string FoundOpcodeEndpoint = $"{Endpoint}/censor/found";
-    private const string CensoredOpcodesEndpoint = $"{Endpoint}/censor/opcodes";
-    
-    private const string TosEndpoint = $"{Endpoint}/info/tos";
-    private const string FaqEndpoint = $"{Endpoint}/info/faq";
-    
+public class ChronofoilClient {
+    private string _endpoint;
+
+    private string RegisterEndpoint => $"{_endpoint}/register/discord";
+    private string LoginEndpoint => $"{_endpoint}/login/discord";
+    private string RefreshEndpoint => $"{_endpoint}/token/refresh";
+    private string TosAcceptEndpoint => $"{_endpoint}/tos/accept";
+
+    private string UploadEndpoint => $"{_endpoint}/capture/upload";
+    private string DeleteEndpoint => $"{_endpoint}/capture/delete";
+    private string CaptureListEndpoint => $"{_endpoint}/capture/list";
+
+    private string FoundOpcodeEndpoint => $"{_endpoint}/censor/found";
+    private string CensoredOpcodesEndpoint => $"{_endpoint}/censor/opcodes";
+
+    private string TosEndpoint => $"{_endpoint}/info/tos";
+    private string FaqEndpoint => $"{_endpoint}/info/faq";
+
     private static readonly HttpClient Client = new();
-    
+
     private readonly IPluginLog _log;
     private readonly Configuration _config;
     private readonly JsonSerializerOptions _options;
@@ -44,6 +44,7 @@ public class ChronofoilClient
         _log = log;
         _config = config;
         _options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        _endpoint = _config.ApiEndpoint;
     }
 
     private AccessTokenResponse? HitTokenEndpoint(string endpoint, string code)
@@ -67,7 +68,7 @@ public class ChronofoilClient
         response = HitTokenEndpoint(LoginEndpoint, authCode);
         return response != null;
     }
-    
+
     public bool TryRefresh(string refreshCode, out AccessTokenResponse? response)
     {
         var request = new RefreshRequest { RefreshToken = refreshCode };
@@ -94,15 +95,15 @@ public class ChronofoilClient
         {
             return new FaqResponse(); // not a huge deal
         }
-            
+
         return JsonConvert.DeserializeObject<FaqResponse>(resp.Content.ReadAsStringAsync().Result);
     }
-    
+
     public bool TrySendOpcodes(FoundOpcodesRequest request)
     {
         _log.Verbose($"[TrySendOpcodes] Begin");
         var token = _config.AccessToken;
-        
+
         var message = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
@@ -119,7 +120,7 @@ public class ChronofoilClient
     public bool TryGetCensoredOpcodes(string gameVersion, out CensoredOpcodesResponse censoredOpcodes)
     {
         _log.Verbose($"[TryGetCensoredOpcodes] Begin");
-        
+
         censoredOpcodes = new CensoredOpcodesResponse();
         var request = new CensoredOpcodesRequest { GameVersion = gameVersion };
 
@@ -142,7 +143,7 @@ public class ChronofoilClient
         _log.Verbose($"[TryDeleteCapture] Begin");
 
         var request = new CaptureDeletionRequest { CaptureId = captureId };
-        
+
         var message = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
@@ -158,11 +159,11 @@ public class ChronofoilClient
     public bool TryUploadCapture(FileInfo captureFile, CaptureUploadRequest request, ProgressHolder progress, out CaptureUploadResponse captureUploadResponse)
     {
         _log.Verbose($"[TryUploadCapture] Begin");
-        
+
         captureUploadResponse = new CaptureUploadResponse();
         var json = JsonSerializer.Serialize(request);
         var captureFileContent = new ProgressableStreamContent(new StreamContent(captureFile.OpenRead()), progress.Set);
-        
+
         var content = new MultipartFormDataContent(Util.RandomByteString(16));
         content.Add(new StringContent(json), "files", "meta.json");
         content.Add(captureFileContent, "files", $"{captureUploadResponse.CaptureId}.ccfcap");
@@ -180,7 +181,7 @@ public class ChronofoilClient
             throw new Exception($"Response code did not indicate success: {response.StatusCode} {response.Content.ReadAsStringAsync().Result}");
             // return false;
         }
-        
+
         captureUploadResponse = JsonConvert.DeserializeObject<CaptureUploadResponse>(response.Content.ReadAsStringAsync().Result);
         return true;
     }
@@ -190,7 +191,7 @@ public class ChronofoilClient
         _log.Verbose("[TryAcceptTos] Begin");
 
         var request = new AcceptTosRequest { TosVersion = tosVersion};
-        
+
         var message = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
@@ -204,11 +205,11 @@ public class ChronofoilClient
             throw new Exception($"Response code did not indicate success: {response.StatusCode} {response.Content.ReadAsStringAsync().Result}");
         return true;
     }
-    
+
     public CaptureListResponse? GetCaptureList()
     {
         _log.Verbose("[GetUploadedCaptureList] Begin");
-        
+
         var message = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
