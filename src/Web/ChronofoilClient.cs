@@ -2,7 +2,9 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text.Json;
 using Chronofoil.Common.Auth;
 using Chronofoil.Common.Censor;
@@ -33,24 +35,27 @@ public class ChronofoilClient
     private const string TosEndpoint = $"{Endpoint}/info/tos";
     private const string FaqEndpoint = $"{Endpoint}/info/faq";
     
-    private static readonly HttpClient Client = new();
-    
     private readonly IPluginLog _log;
     private readonly Configuration _config;
     private readonly JsonSerializerOptions _options;
+    private readonly HttpClient _client;
 
     public ChronofoilClient(IPluginLog log, Configuration config)
     {
         _log = log;
         _config = config;
         _options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        _client = new HttpClient();
+        
+        var version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+        _client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Chronofoil.Plugin", version));
     }
 
     private AccessTokenResponse? HitTokenEndpoint(string endpoint, string code)
     {
         var request = new AuthRequest { AuthorizationCode = code };
         var content = JsonContent.Create(request, null, _options);
-        var response = Client.PostAsync(endpoint, content).Result;
+        var response = _client.PostAsync(endpoint, content).Result;
         if (!response.IsSuccessStatusCode)
             throw new Exception($"Response code did not indicate success: {response.StatusCode}");
         return JsonConvert.DeserializeObject<AccessTokenResponse>(response.Content.ReadAsStringAsync().Result);
@@ -72,7 +77,7 @@ public class ChronofoilClient
     {
         var request = new RefreshRequest { RefreshToken = refreshCode };
         var content = JsonContent.Create(request, null, _options);
-        var resp = Client.PostAsync(RefreshEndpoint, content).Result;
+        var resp = _client.PostAsync(RefreshEndpoint, content).Result;
         if (!resp.IsSuccessStatusCode)
             throw new Exception($"Response code did not indicate success: {resp.StatusCode}");
         response = JsonConvert.DeserializeObject<AccessTokenResponse>(resp.Content.ReadAsStringAsync().Result);
@@ -81,7 +86,7 @@ public class ChronofoilClient
 
     public TosResponse GetTos()
     {
-        var resp = Client.GetAsync(TosEndpoint).Result;
+        var resp = _client.GetAsync(TosEndpoint).Result;
         if (!resp.IsSuccessStatusCode)
             throw new Exception($"Response code did not indicate success: {resp.StatusCode}");
         return JsonConvert.DeserializeObject<TosResponse>(resp.Content.ReadAsStringAsync().Result);
@@ -89,7 +94,7 @@ public class ChronofoilClient
 
     public FaqResponse GetFaq()
     {
-        var resp = Client.GetAsync(FaqEndpoint).Result;
+        var resp = _client.GetAsync(FaqEndpoint).Result;
         if (!resp.IsSuccessStatusCode)
         {
             return new FaqResponse(); // not a huge deal
@@ -110,7 +115,7 @@ public class ChronofoilClient
             Headers = { { HttpRequestHeader.Authorization.ToString(), $"Bearer {token}" } },
             Content = JsonContent.Create(request)
         };
-        var response = Client.SendAsync(message).Result;
+        var response = _client.SendAsync(message).Result;
         _log.Verbose($"[TrySendOpcodes] Response was {response.StatusCode}");
         return response.IsSuccessStatusCode;
         // throw new Exception($"Response code did not indicate success: {response.StatusCode}");
@@ -130,7 +135,7 @@ public class ChronofoilClient
             Headers = { { HttpRequestHeader.Authorization.ToString(), $"Bearer {_config.AccessToken}" } },
             Content = JsonContent.Create(request)
         };
-        var response = Client.SendAsync(message).Result;
+        var response = _client.SendAsync(message).Result;
         if (!response.IsSuccessStatusCode)
             throw new Exception($"Response code did not indicate success: {response.StatusCode}");
         censoredOpcodes = JsonConvert.DeserializeObject<CensoredOpcodesResponse>(response.Content.ReadAsStringAsync().Result);
@@ -150,7 +155,7 @@ public class ChronofoilClient
             Headers = { { HttpRequestHeader.Authorization.ToString(), $"Bearer {_config.AccessToken}" } },
             Content = JsonContent.Create(request)
         };
-        var response = Client.SendAsync(message).Result;
+        var response = _client.SendAsync(message).Result;
         _log.Verbose($"[TryDeleteCapture] Response was {response}");
         return response.IsSuccessStatusCode;
     }
@@ -174,7 +179,7 @@ public class ChronofoilClient
             Headers = { { HttpRequestHeader.Authorization.ToString(), $"Bearer {_config.AccessToken}" } },
             Content = content
         };
-        var response = Client.SendAsync(message).Result;
+        var response = _client.SendAsync(message).Result;
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception($"Response code did not indicate success: {response.StatusCode} {response.Content.ReadAsStringAsync().Result}");
@@ -198,7 +203,7 @@ public class ChronofoilClient
             Headers = { { HttpRequestHeader.Authorization.ToString(), $"Bearer {_config.AccessToken}" } },
             Content = JsonContent.Create(request)
         };
-        var response = Client.SendAsync(message).Result;
+        var response = _client.SendAsync(message).Result;
         _log.Verbose($"[TryAcceptTos] Response was {response}");
         if (!response.IsSuccessStatusCode)
             throw new Exception($"Response code did not indicate success: {response.StatusCode} {response.Content.ReadAsStringAsync().Result}");
@@ -215,7 +220,7 @@ public class ChronofoilClient
             RequestUri = new Uri($"{CaptureListEndpoint}"),
             Headers = { { HttpRequestHeader.Authorization.ToString(), $"Bearer {_config.AccessToken}" } }
         };
-        var response = Client.SendAsync(message).Result;
+        var response = _client.SendAsync(message).Result;
         _log.Verbose($"[GetUploadedCaptureList] Response was {response}");
         if (!response.IsSuccessStatusCode)
         {
