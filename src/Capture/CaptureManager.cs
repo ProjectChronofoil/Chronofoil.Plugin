@@ -195,6 +195,10 @@ public class CaptureManager
             var censoredPath = path.Replace(".cfcap", ".ccfcap");
             File.Delete(path);
             File.Delete(censoredPath);
+
+            var contextDirectory = Path.Combine(_config.StorageDirectory, "{captureId}_ctx");
+            if (Directory.Exists(contextDirectory))
+                Directory.Delete(contextDirectory, recursive: true);
         }
         _state.RemoveCapture(captureId);
         Save();

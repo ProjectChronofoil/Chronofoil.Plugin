@@ -13,8 +13,8 @@ public class Configuration : IPluginConfiguration
 
     public string StorageDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "chronofoil");
 
-    public bool EnableContext { get; set; }
-    public bool EnableUpload { get; set; }
+    public bool EnableContext { get; set; } = false;
+    public bool EnableUpload { get; set; } = false;
 
     public string AccessToken { get; set; } = "";
     public string RefreshToken { get; set; } = "";

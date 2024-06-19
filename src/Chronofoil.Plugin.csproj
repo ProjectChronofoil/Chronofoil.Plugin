@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-    <PluginVersion>1.0.0.1</PluginVersion>
+    <PluginVersion>1.0.0.0</PluginVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -13,7 +13,6 @@
     <RootNamespace>Chronofoil</RootNamespace>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>preview</LangVersion>
@@ -42,6 +41,7 @@
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
       <Private>false</Private>
@@ -62,8 +62,16 @@
       <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Lumina">
-      <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+    <Reference Include="SharpDX.Direct3D11">
+      <HintPath>$(DalamudLibPath)SharpDX.Direct3D11.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SharpDX.DXGI">
+      <HintPath>$(DalamudLibPath)SharpDX.DXGI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>$(DalamudLibPath)SharpDX.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <PackageReference Include="DalamudPackager" Version="2.1.12" />
@@ -81,5 +89,6 @@
   <ItemGroup>
     <None Remove="Data\icon_small.png" />
     <EmbeddedResource Include="Data\icon_small.png" />
+    <None Remove="packages.lock.json" />
   </ItemGroup>
 </Project>

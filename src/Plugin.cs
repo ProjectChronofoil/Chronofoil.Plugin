@@ -1,4 +1,5 @@
 ﻿using Chronofoil.Capture;
+using Chronofoil.Capture.Context;
 using Chronofoil.Capture.IO;
 using Chronofoil.Capture.Session;
 using Chronofoil.Censor;
@@ -52,6 +53,7 @@ public class Plugin : IDalamudPlugin
 				.AddSingleton<MultiSigScanner>()
 				.AddSingleton<CaptureHookManager>()
 				.AddSingleton<CaptureSessionManager>()
+				.AddSingleton<ContextManager>()
 				.AddSingleton<LobbyEncryptionProvider>()
 				.AddSingleton<CaptureManager>()
 				.AddSingleton<ChronofoilClient>()
@@ -79,6 +81,7 @@ public class Plugin : IDalamudPlugin
 		// initialization of singletons
 		_host.Services.GetService<Chronofoil>();
 		_host.Services.GetService<CaptureSessionManager>();
+		_host.Services.GetService<ContextManager>();
 		_host.Services.GetService<OpcodeService>();
 	}
 	
