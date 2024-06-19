@@ -64,3 +64,5 @@ Follow these steps:
 5. Click on the circular "Save and Close" button in the bottom-right corner
 6. You will now see Chronofoil listed in the Available Plugins tab in the Dalamud Plugin Installer
 7. Do not forget to actually install Chronofoil from this tab once ready
+
+https://raw.githubusercontent.com/ProjectChronofoil/Chronofoil.Plugin/main/repo.json
