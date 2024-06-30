@@ -6,7 +6,6 @@ using System.Linq;
 using Chronofoil.Capture.Session;
 using Chronofoil.CaptureFile;
 using Dalamud.Interface.ImGuiNotification;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Plugin.Services;
 using Newtonsoft.Json;
 

@@ -5,7 +5,6 @@ using Chronofoil.UI;
 using Chronofoil.UI.Components;
 using Chronofoil.Utility;
 using Chronofoil.Web.Auth;
-using Dalamud.Interface;
 using Dalamud.Plugin.Services;
 
 namespace Chronofoil;
@@ -21,7 +20,7 @@ public class Chronofoil
     private readonly NewTosModal _tosModal;
     
     public Chronofoil(
-        UiBuilder uiBuilder,
+        ITextureProvider textureProvider,
         ITitleScreenMenu titleScreenMenu,
         ICommandManager commandManager,
         IPluginLog log,
@@ -34,7 +33,7 @@ public class Chronofoil
         _commandManager = commandManager;
         _ui = ui;
 
-        PrepareTitleScreenIcon(uiBuilder, titleScreenMenu, ui);
+        PrepareTitleScreenIcon(textureProvider, titleScreenMenu, ui);
         waiter.OnTitleScreenAppeared += () => Task.Run(() => CheckAndWarnNewTos(authManager, tosModal));
         
         _commandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
@@ -43,14 +42,14 @@ public class Chronofoil
         });
     }
 
-    private void PrepareTitleScreenIcon(UiBuilder uiBuilder, ITitleScreenMenu titleScreenMenu, ChronofoilUI ui)
+    private void PrepareTitleScreenIcon(ITextureProvider textureProvider, ITitleScreenMenu titleScreenMenu, ChronofoilUI ui)
     {
         try
         {
             const string resourceName = "Chronofoil.Data.icon_small.png";
             var resource = Util.GetResource(resourceName);
             _log.Verbose($"resource {resourceName} is {resource.Length} bytes");
-            var texture = uiBuilder.LoadImage(resource);
+            var texture = textureProvider.CreateFromImageAsync(resource).Result;
             titleScreenMenu.AddEntry("Chronofoil", texture, ui.ShowMainWindow);
         }
         catch (Exception e)

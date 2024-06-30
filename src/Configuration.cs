@@ -35,9 +35,9 @@ public class Configuration : IPluginConfiguration
     public bool CaptureEndNotificationsEnabled { get; set; }
     public bool UploadCapturesNotificationsEnabled { get; set; }
 
-    [NonSerialized] private DalamudPluginInterface _pluginInterface;
+    [NonSerialized] private IDalamudPluginInterface _pluginInterface;
 
-    public void Initialize(DalamudPluginInterface pluginInterface)
+    public void Initialize(IDalamudPluginInterface pluginInterface)
     {
         _pluginInterface = pluginInterface;
     }

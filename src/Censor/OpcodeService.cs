@@ -21,7 +21,7 @@ namespace Chronofoil.Censor;
 public class OpcodeService : IDisposable
 {
     private readonly IPluginLog _log;
-    private readonly DalamudPluginInterface _pi;
+    private readonly IDalamudPluginInterface _pi;
     private readonly ChronofoilClient _chronofoilClient;
     
     private readonly OpcodeStore _store;
@@ -29,12 +29,12 @@ public class OpcodeService : IDisposable
     
     private string StorePath => Path.Combine(_pi.GetPluginConfigDirectory(), "OpcodeStore.json");
 
-    private const string ZoneChatUpSig = "C7 45 ?? ?? ?? ?? ?? 48 C7 45 ?? ?? ?? ?? ?? C7 45 ?? ?? ?? ?? ?? 0F 11 45 54";
-    private const string ZoneLetterUpSig = "C7 44 24 ?? ?? ?? ?? ?? 48 C7 44 24 ?? ?? ?? ?? ?? 0F 10 00 48 89 5C 24";
+    private const string ZoneChatUpSig = "C7 45 ?? ?? ?? ?? ?? 0F C6 C0 27";
+    private const string ZoneLetterUpSig = "C7 44 24 ?? ?? ?? ?? ?? 48 C7 44 24 ?? ?? ?? ?? ?? 0F 10 00 48 89 74 24";
 
-    private const string ZoneChatDownSig = "40 53 48 83 EC 20 48 8B DA 48 8D 0D ?? ?? ?? ?? 8B 52 08";
-    private const string ZoneLetterListDownSig = "48 89 5C 24 ?? 55 56 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B DA 33 FF";
-    private const string ZoneLetterDownSig = "40 53 56 48 83 EC 38 8B 81";
+    private const string ZoneChatDownSig = "E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 78";
+    private const string ZoneLetterListDownSig = "48 89 5C 24 ?? 55 56 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B E9 33 DB";
+    private const string ZoneLetterDownSig = "48 89 5C 24 ?? 56 41 56 41 57 48 83 EC 30 8B 81";
     
     private delegate void GenericPacketHandlerDelegate(nuint thisPtr, nuint packet);
     
@@ -42,7 +42,7 @@ public class OpcodeService : IDisposable
     private Hook<GenericPacketHandlerDelegate>? _zoneLetterListDownHook;
     private Hook<GenericPacketHandlerDelegate>? _zoneLetterDownHook;
 
-    public OpcodeService(IPluginLog log, DalamudPluginInterface pi, ChronofoilClient chronofoilClient, ISigScanner sigScanner, IGameInteropProvider hooks)
+    public OpcodeService(IPluginLog log, IDalamudPluginInterface pi, ChronofoilClient chronofoilClient, ISigScanner sigScanner, IGameInteropProvider hooks)
     {
         _log = log;
         _pi = pi;

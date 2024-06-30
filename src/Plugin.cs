@@ -27,7 +27,7 @@ public class Plugin : IDalamudPlugin
 {
 	private readonly IHost _host;
 	
-	public Plugin(DalamudPluginInterface pi)
+	public Plugin(IDalamudPluginInterface pi)
 	{
 		var builder = new HostBuilder();
 		builder
@@ -46,6 +46,7 @@ public class Plugin : IDalamudPlugin
 				.AddDalamudService<ICommandManager>(pi)
 				.AddDalamudService<IGameGui>(pi)
 				.AddDalamudService<ISigScanner>(pi)
+				.AddDalamudService<ITextureProvider>(pi)
 				.AddDalamudService<IGameInteropProvider>(pi)
 				.AddDalamudService<IPluginLog>(pi)
 				.AddDalamudService<INotificationManager>(pi)

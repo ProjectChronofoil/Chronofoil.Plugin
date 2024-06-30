@@ -6,7 +6,7 @@ namespace Chronofoil.Utility;
 
 public static class ServiceExtensions
 {
-	public static IServiceCollection AddDalamudService<T>(this IServiceCollection collection, DalamudPluginInterface pi) where T : class
+	public static IServiceCollection AddDalamudService<T>(this IServiceCollection collection, IDalamudPluginInterface pi) where T : class
 	{
 		var wrapper = new DalamudServiceWrapper<T>(pi);
 		collection.AddSingleton(wrapper.Service);
@@ -24,10 +24,9 @@ public static class ServiceExtensions
 class DalamudServiceWrapper<T>
 {
 	[PluginService]
-	[RequiredVersion("1.0")]
 	public T Service { get; private set; } = default!;
 
-	public DalamudServiceWrapper(DalamudPluginInterface pi)
+	public DalamudServiceWrapper(IDalamudPluginInterface pi)
 	{
 		pi.Inject(this);
 	}

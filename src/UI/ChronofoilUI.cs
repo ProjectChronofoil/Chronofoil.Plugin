@@ -9,7 +9,7 @@ namespace Chronofoil.UI;
 public class ChronofoilUI
 {
 	private readonly IPluginLog _log;
-	private readonly UiBuilder _uiBuilder;
+	private readonly IUiBuilder _uiBuilder;
 	
 	private readonly WindowSystem _windowSystem;
 
@@ -22,7 +22,7 @@ public class ChronofoilUI
 		LoginModal loginModal,
 		UploadModal uploadModal,
 		NewTosModal newTosModal,
-		UiBuilder uiBuilder
+		IUiBuilder uiBuilder
 	)
 	{
 		_log = log;

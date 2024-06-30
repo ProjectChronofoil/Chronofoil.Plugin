@@ -15,10 +15,10 @@ namespace Chronofoil.Capture.IO;
 
 public unsafe class CaptureHookManager : IDisposable
 {
-	private const string LobbyKeySignature = "C7 46 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 3B EB";
+	private const string LobbyKeySignature = "C7 46 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 3B F3";
 	// private const string NetworkInitSignature = "E8 ?? ?? ?? ?? 48 8D 4C 24 ?? E8 ?? ?? ?? ?? 48 8D 8C 24 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 8F";
-	private const string GenericRxSignature = "E8 ?? ?? ?? ?? 4C 8B 43 10 41 8B 40 18";
-	private const string GenericTxSignature = "E8 ?? ?? ?? ?? 8B 53 2C 48 8D 8B";
+	private const string GenericRxSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
+	private const string GenericTxSignature = "40 57 41 56 48 83 EC 38 48 8B F9 4C 8B F2";
 	private const string LobbyTxSignature = "40 53 48 83 EC 20 44 8B 41 28";
 
 	public delegate void NetworkInitializedDelegate();
@@ -28,7 +28,7 @@ public unsafe class CaptureHookManager : IDisposable
 	public event NetworkEventDelegate? NetworkEvent;
 	
 	private delegate nuint RxPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5);
-	private delegate nuint TxPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5, nuint a6);
+	private delegate nuint TxPrototype(byte* data, nint a2);
 	private delegate void LobbyTxPrototype(nuint data);
 
 	private readonly Hook<RxPrototype> _chatRxHook;
@@ -147,14 +147,14 @@ public unsafe class CaptureHookManager : IDisposable
         return ret;
     }
     
-    private nuint ChatTxDetour(byte* data, byte* a2, nuint a3, nuint a4, nuint a5, nuint a6)
+    private nuint ChatTxDetour(byte* data, nint a2)
     {
 	    // _log.Debug($"ChatTxDetour: {(long)data:X} {(long)a2:X} {a3:X} {a4:X} {a5:X} {a6:X}");
 	    var ptr = (nuint*)data;
-        ptr += 2;
+        ptr += 4;
         PacketsFromFrame(Protocol.Chat, Direction.Tx, (byte*) *ptr);
 
-        return _chatTxHook.Original(data, a2, a3, a4, a5, a6);
+        return _chatTxHook.Original(data, a2);
     }
     
     private void LobbyTxDetour(nuint data)
@@ -167,14 +167,14 @@ public unsafe class CaptureHookManager : IDisposable
         PacketsFromFrame(Protocol.Lobby, Direction.Tx, (byte*) ptr);
     }
     
-    private nuint ZoneTxDetour(byte* data, byte* a2, nuint a3, nuint a4, nuint a5, nuint a6)
+    private nuint ZoneTxDetour(byte* data, nint a2)
     {
 	    // _log.Debug($"ZoneTxDetour: {(long)data:X} {(long)a2:X} {a3:X} {a4:X} {a5:X} {a6:X}");
 	    var ptr = (nuint*)data;
-        ptr += 2;
+        ptr += 4;
         PacketsFromFrame(Protocol.Zone, Direction.Tx, (byte*) *ptr);
         
-        return _zoneTxHook.Original(data, a2, a3, a4, a5, a6);
+        return _zoneTxHook.Original(data, a2);
     }
 
     private void PacketsFromFrame(Protocol proto, Direction direction, byte* framePtr)

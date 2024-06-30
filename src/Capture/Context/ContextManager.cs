@@ -15,7 +15,7 @@ namespace Chronofoil.Capture.Context;
 
 public unsafe class ContextManager : IDisposable
 {
-    private const string PresentSig = "E8 ?? ?? ?? ?? C6 47 79 00";
+    private const string PresentSig = "E8 ?? ?? ?? ?? C6 46 79 00 EB 40";
     private const int Interval = 5000;
 
     private delegate void PresentPrototype(nint address);
