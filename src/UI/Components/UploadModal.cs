@@ -153,7 +153,7 @@ public class UploadModal : Window
         }
 
 		var length = (captureEnd - captureStart).Value;
-        var lengthString = string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
+		var lengthString = string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
 		var startString = captureStart?.ToString(CultureInfo.InvariantCulture);
         var endString = captureEnd?.ToString(CultureInfo.InvariantCulture);
         

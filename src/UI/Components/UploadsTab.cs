@@ -108,12 +108,17 @@ public class UploadsTab
         }
         else
         {
-	        if (ImGui.BeginTable("UploadsTable##cf_uploadstab", 6, tableFlags))
+			var earliestContribution = DateTime.MaxValue;
+			var latestContribution = DateTime.MinValue;
+			var accumulatedLength = new TimeSpan(0, 0, 0);
+
+	        if (ImGui.BeginTable("UploadsTable##cf_uploadstab", 7, tableFlags))
 	        {
 		        ImGui.TableSetupColumn("Capture ID", ImGuiTableColumnFlags.WidthFixed);
 		        ImGui.TableSetupColumn("Start Time", ImGuiTableColumnFlags.WidthFixed);
 		        ImGui.TableSetupColumn("End Time", ImGuiTableColumnFlags.WidthFixed);
-		        ImGui.TableSetupColumn("Metrics Time", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.TableSetupColumn("Length", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.TableSetupColumn("Metrics Time", ImGuiTableColumnFlags.WidthFixed);
 		        ImGui.TableSetupColumn("Public Time", ImGuiTableColumnFlags.WidthFixed);
 		        ImGui.TableSetupColumn("Delete from Server", ImGuiTableColumnFlags.WidthFixed);
 		        ImGui.TableSetupScrollFreeze(0, 1);
@@ -125,10 +130,16 @@ public class UploadsTab
 			        var guid = element.CaptureId;
 			        var captureStartStr = element.StartTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
 			        var captureEndStr = element.EndTime.ToLocalTime().ToString(CultureInfo.CurrentCulture);
-			        var metricsTimeStr = Util.GetTimeString(element.MetricsTime, element.MetricsWhenEos);
+					var length = element.EndTime.ToLocalTime() - element.StartTime.ToLocalTime();
+					var lengthStr = string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
+					var metricsTimeStr = Util.GetTimeString(element.MetricsTime, element.MetricsWhenEos);
 			        var publicTimeStr = Util.GetTimeString(element.PublicTime, element.PublicWhenEos);
-			        
-			        ImGui.TableNextRow();
+
+					if (earliestContribution > element.StartTime.ToLocalTime()) earliestContribution = element.StartTime.ToLocalTime();
+					if (latestContribution < element.EndTime.ToLocalTime()) latestContribution = element.EndTime.ToLocalTime();
+					accumulatedLength += length;
+
+					ImGui.TableNextRow();
 			        ImGui.TableNextColumn();
 			        ImGui.TextUnformatted(guid.ToString());
 			        ImGui.TableNextColumn();
@@ -136,7 +147,9 @@ public class UploadsTab
 			        ImGui.TableNextColumn();
 			        ImGui.TextUnformatted(captureEndStr);
 			        ImGui.TableNextColumn();
-			        ImGui.TextUnformatted(metricsTimeStr);
+					ImGui.TextUnformatted(lengthStr);
+					ImGui.TableNextColumn();
+					ImGui.TextUnformatted(metricsTimeStr);
 			        ImGui.TableNextColumn();
 			        ImGui.TextUnformatted(publicTimeStr);
 			        ImGui.TableNextColumn();
@@ -182,7 +195,23 @@ public class UploadsTab
 			        }
 		        }
 
-		        ImGui.EndTable();
+				ImGui.TableNextRow();
+				ImGui.TableNextColumn();
+				ImGui.TextUnformatted("Total contribution stats:");
+				ImGui.TableNextColumn();
+				ImGui.TextUnformatted(earliestContribution.ToString());
+				if (ImGui.IsItemHovered())
+					ImGui.SetTooltip("The first time you recorded and uploaded a session.");
+				ImGui.TableNextColumn();
+				ImGui.TextUnformatted(latestContribution.ToString());
+				if (ImGui.IsItemHovered())
+					ImGui.SetTooltip("The last time you recorded and uploaded a session.");
+				ImGui.TableNextColumn();
+				ImGui.TextUnformatted(string.Format("{0}:{1:00}:{2:00}:{3:00}", Math.Floor(accumulatedLength.TotalDays), Math.Floor(accumulatedLength.TotalHours), accumulatedLength.Minutes, accumulatedLength.Seconds));
+				if (ImGui.IsItemHovered())
+					ImGui.SetTooltip("The total accumulated Time you recorded and uploaded.");
+
+				ImGui.EndTable();
 	        }
         }
     }

@@ -59,7 +59,8 @@ public class CaptureTab
 
 			var canUpload = !string.IsNullOrEmpty(_config.AccessToken) && _config.TokenExpiryTime > DateTime.UtcNow;
 
-			foreach (var guid in _captureManager.CapturesByTime) {
+			foreach (var guid in _captureManager.CapturesByTime)
+			{
 				var captureStartTime = _captureManager.GetStartTime(guid)!.Value;
 				var captureEndTime = _captureManager.GetEndTime(guid)!.Value;
 				var length = captureEndTime - captureStartTime;
