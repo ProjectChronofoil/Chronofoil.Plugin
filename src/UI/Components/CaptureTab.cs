@@ -67,17 +67,20 @@ public class CaptureTab
 				var uploaded = _captureManager.GetUploaded(guid)!.Value;
 				var ignored = _captureManager.GetIgnored(guid)!.Value;
 				var capturing = _captureManager.GetCapturing(guid)!.Value;
-				
+
+				var captureInProgress = captureEndTime == DateTime.UnixEpoch;
+
 				ImGui.TableNextRow();
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(guid.ToString());
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(captureStartTime.ToLocalTime().ToString(CultureInfo.CurrentCulture));
 				ImGui.TableNextColumn();
-				var captureEndString = captureEndTime == DateTime.UnixEpoch ? "In Progress" : captureEndTime.ToLocalTime().ToString(CultureInfo.CurrentCulture); 
+				var captureEndString = captureInProgress ? "In Progress" : captureEndTime.ToLocalTime().ToString(CultureInfo.CurrentCulture); 
 				ImGui.TextUnformatted(captureEndString);
 				ImGui.TableNextColumn();
-				ImGui.TextUnformatted(string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds));
+				var lengthStr = captureInProgress ? "In Progress" : string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
+				ImGui.TextUnformatted(lengthStr);
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(uploaded ? "Yes" : "No");
 				ImGui.TableNextColumn();

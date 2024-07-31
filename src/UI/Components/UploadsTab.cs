@@ -207,7 +207,7 @@ public class UploadsTab
 				if (ImGui.IsItemHovered())
 					ImGui.SetTooltip("The last time you recorded and uploaded a session.");
 				ImGui.TableNextColumn();
-				ImGui.TextUnformatted(string.Format("{0}:{1:00}:{2:00}:{3:00}", Math.Floor(accumulatedLength.TotalDays), Math.Floor(accumulatedLength.TotalHours), accumulatedLength.Minutes, accumulatedLength.Seconds));
+				ImGui.TextUnformatted(string.Format("{0}:{1:00}:{2:00}:{3:00}", Math.Floor(accumulatedLength.TotalDays), accumulatedLength.Hours, accumulatedLength.Minutes, accumulatedLength.Seconds));
 				if (ImGui.IsItemHovered())
 					ImGui.SetTooltip("The total accumulated Time you recorded and uploaded.");
 
