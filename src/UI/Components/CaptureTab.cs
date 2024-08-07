@@ -41,11 +41,12 @@ public class CaptureTab
     {
         var tableFlags = ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;// | ImGuiTableFlags.SizingFixedFit;
 		
-		if (ImGui.BeginTable("CapturesTable##cf_capturetab", 8, tableFlags))
+		if (ImGui.BeginTable("CapturesTable##cf_capturetab", 9, tableFlags))
 		{
 			ImGui.TableSetupColumn("Capture ID", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Start Time", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("End Time", ImGuiTableColumnFlags.WidthFixed);
+			ImGui.TableSetupColumn("Length", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Uploaded", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Ignored", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Upload", ImGuiTableColumnFlags.WidthFixed);
@@ -62,18 +63,24 @@ public class CaptureTab
 			{
 				var captureStartTime = _captureManager.GetStartTime(guid)!.Value;
 				var captureEndTime = _captureManager.GetEndTime(guid)!.Value;
+				var length = captureEndTime - captureStartTime;
 				var uploaded = _captureManager.GetUploaded(guid)!.Value;
 				var ignored = _captureManager.GetIgnored(guid)!.Value;
 				var capturing = _captureManager.GetCapturing(guid)!.Value;
-				
+
+				var captureInProgress = captureEndTime == DateTime.UnixEpoch;
+
 				ImGui.TableNextRow();
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(guid.ToString());
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(captureStartTime.ToLocalTime().ToString(CultureInfo.CurrentCulture));
 				ImGui.TableNextColumn();
-				var captureEndString = captureEndTime == DateTime.UnixEpoch ? "In Progress" : captureEndTime.ToLocalTime().ToString(CultureInfo.CurrentCulture); 
+				var captureEndString = captureInProgress ? "In Progress" : captureEndTime.ToLocalTime().ToString(CultureInfo.CurrentCulture); 
 				ImGui.TextUnformatted(captureEndString);
+				ImGui.TableNextColumn();
+				var lengthStr = captureInProgress ? "In Progress" : string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
+				ImGui.TextUnformatted(lengthStr);
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(uploaded ? "Yes" : "No");
 				ImGui.TableNextColumn();

@@ -152,10 +152,12 @@ public class UploadModal : Window
             return;
         }
 
-        var startString = captureStart?.ToString(CultureInfo.InvariantCulture);
+		var length = (captureEnd - captureStart).Value;
+		var lengthString = string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
+		var startString = captureStart?.ToString(CultureInfo.InvariantCulture);
         var endString = captureEnd?.ToString(CultureInfo.InvariantCulture);
         
-        ImGuiHelpers.SafeTextWrapped($"Preparing to upload capture {_captureId}, began {startString}, ended {endString}");
+        ImGuiHelpers.SafeTextWrapped($"Preparing to upload capture {_captureId}, began {startString}, ended {endString}, for a total duration of {lengthString}");
 
         ImGui.TextUnformatted("Override my normal settings for this capture upload: ");
         ImGui.SameLine();
