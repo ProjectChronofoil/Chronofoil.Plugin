@@ -100,11 +100,13 @@ public class CaptureManager
         var captureId = Guid.Parse(reader.CaptureInfo.CaptureId);
         var startTime = reader.CaptureInfo.CaptureStartTime.ToDateTime();
         var endTime = reader.CaptureInfo.CaptureEndTime.ToDateTime();
+        var length = new FileInfo(capturePath).Length;
 
         if (_state.TryGetCapture(captureId, out var existingCapture))
         {
             existingCapture.StartTime = startTime;
             existingCapture.EndTime = endTime;
+            existingCapture.FileSize = length;
         }
         else
         {
@@ -168,6 +170,7 @@ public class CaptureManager
             CaptureId = captureId,
             StartTime = startTime,
             EndTime = DateTime.UnixEpoch,
+            FileSize = 0,
             IsUploaded = false,
             IsIgnored = false
         };
@@ -252,6 +255,14 @@ public class CaptureManager
         _log.Error($"Tried to get ignored for a capture that didn't exist: {captureId}");
         return false;
     }
+    
+    public long? GetFileSize(Guid captureId)
+    {
+        if (_state.TryGetCapture(captureId, out var capture))
+            return capture.FileSize;
+        _log.Error($"Tried to get filesize for a capture that didn't exist: {captureId}");
+        return 0;
+    }
 
     public bool? GetCapturing(Guid captureId)
     {
@@ -285,6 +296,7 @@ internal class KnownCapture
     public Guid CaptureId { get; init; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
+    public long FileSize { get; set; }
     public bool IsUploaded { get; set; }
     public bool IsIgnored { get; set; }
 }

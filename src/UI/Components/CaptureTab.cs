@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Chronofoil.Capture;
+using Chronofoil.Utility;
 using Chronofoil.Web;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -41,12 +42,13 @@ public class CaptureTab
     {
         var tableFlags = ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.ScrollX;// | ImGuiTableFlags.SizingFixedFit;
 		
-		if (ImGui.BeginTable("CapturesTable##cf_capturetab", 9, tableFlags))
+		if (ImGui.BeginTable("CapturesTable##cf_capturetab", 10, tableFlags))
 		{
 			ImGui.TableSetupColumn("Capture ID", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Start Time", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("End Time", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Length", ImGuiTableColumnFlags.WidthFixed);
+			ImGui.TableSetupColumn("File Size", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Uploaded", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Ignored", ImGuiTableColumnFlags.WidthFixed);
 			ImGui.TableSetupColumn("Upload", ImGuiTableColumnFlags.WidthFixed);
@@ -63,13 +65,19 @@ public class CaptureTab
 			{
 				var captureStartTime = _captureManager.GetStartTime(guid)!.Value;
 				var captureEndTime = _captureManager.GetEndTime(guid)!.Value;
+				var captureInProgress = captureEndTime == DateTime.UnixEpoch;
+				
 				var length = captureEndTime - captureStartTime;
+				if (captureInProgress)
+				{
+					length = DateTime.UtcNow - captureStartTime;
+				}
+				
 				var uploaded = _captureManager.GetUploaded(guid)!.Value;
 				var ignored = _captureManager.GetIgnored(guid)!.Value;
 				var capturing = _captureManager.GetCapturing(guid)!.Value;
-
-				var captureInProgress = captureEndTime == DateTime.UnixEpoch;
-
+				var size = _captureManager.GetFileSize(guid)!.Value;
+				
 				ImGui.TableNextRow();
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(guid.ToString());
@@ -79,8 +87,11 @@ public class CaptureTab
 				var captureEndString = captureInProgress ? "In Progress" : captureEndTime.ToLocalTime().ToString(CultureInfo.CurrentCulture); 
 				ImGui.TextUnformatted(captureEndString);
 				ImGui.TableNextColumn();
-				var lengthStr = captureInProgress ? "In Progress" : string.Format("{0:00}:{1:00}:{2:00}", Math.Floor(length.TotalHours), length.Minutes, length.Seconds);
+				var lengthStr = $"{Math.Floor(length.TotalHours):00}:{length.Minutes:00}:{length.Seconds:00}";
 				ImGui.TextUnformatted(lengthStr);
+				ImGui.TableNextColumn();
+				var sizeStr = captureInProgress || size == 0 ? "Unknown" : $"{Util.BytesToString(size)}";
+				ImGui.TextUnformatted(sizeStr);
 				ImGui.TableNextColumn();
 				ImGui.TextUnformatted(uploaded ? "Yes" : "No");
 				ImGui.TableNextColumn();

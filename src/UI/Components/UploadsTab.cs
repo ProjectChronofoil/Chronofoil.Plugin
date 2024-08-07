@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Chronofoil.Capture;
 using Chronofoil.Common.Capture;
 using Chronofoil.Utility;
 using Chronofoil.Web;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 
@@ -112,7 +114,11 @@ public class UploadsTab
 			var latestContribution = DateTime.MinValue;
 			var accumulatedLength = new TimeSpan(0, 0, 0);
 
-	        if (ImGui.BeginTable("UploadsTable##cf_uploadstab", 7, tableFlags))
+			using var _ = ImRaii.Child("UploadsChild##cf_uploadstab");
+
+			var footerHeight = ImGui.CalcTextSize("test").Y;
+
+	        if (ImGui.BeginTable("UploadsTable##cf_uploadstab", 7, tableFlags, new Vector2(-1, -1 * footerHeight - ImGui.GetStyle().WindowPadding.Y)))
 	        {
 		        ImGui.TableSetupColumn("Capture ID", ImGuiTableColumnFlags.WidthFixed);
 		        ImGui.TableSetupColumn("Start Time", ImGuiTableColumnFlags.WidthFixed);
@@ -195,24 +201,35 @@ public class UploadsTab
 			        }
 		        }
 
-				ImGui.TableNextRow();
-				ImGui.TableNextColumn();
-				ImGui.TextUnformatted("Total contribution stats:");
-				ImGui.TableNextColumn();
-				ImGui.TextUnformatted(earliestContribution.ToString());
-				if (ImGui.IsItemHovered())
-					ImGui.SetTooltip("The first time you recorded and uploaded a session.");
-				ImGui.TableNextColumn();
-				ImGui.TextUnformatted(latestContribution.ToString());
-				if (ImGui.IsItemHovered())
-					ImGui.SetTooltip("The last time you recorded and uploaded a session.");
-				ImGui.TableNextColumn();
-				ImGui.TextUnformatted(string.Format("{0}:{1:00}:{2:00}:{3:00}", Math.Floor(accumulatedLength.TotalDays), accumulatedLength.Hours, accumulatedLength.Minutes, accumulatedLength.Seconds));
-				if (ImGui.IsItemHovered())
-					ImGui.SetTooltip("The total accumulated Time you recorded and uploaded.");
-
 				ImGui.EndTable();
 	        }
+
+	        var startStr = $"First contribution start: {earliestContribution}";
+	        var endStr = $"Last contribution end: {latestContribution}";
+	        var totalTimeStr = $"{Math.Floor(accumulatedLength.TotalDays)}:{accumulatedLength.Hours:00}:{accumulatedLength.Minutes:00}:{accumulatedLength.Seconds:00}";
+	        var totalStr = $"Total time contributed: {totalTimeStr}";
+	        
+	        var endWidth = ImGui.CalcTextSize(endStr).X;
+	        var totalWidth = ImGui.CalcTextSize(totalStr).X;
+	        var availableWidth = ImGui.GetWindowContentRegionMax().X;
+	        
+	        var cursorY = ImGui.GetCursorPosY();
+	        
+	        var totalStart = availableWidth - totalWidth;
+	        var endStart = (availableWidth / 2) - (endWidth / 2);
+	        
+	        // Draw start
+	        ImGui.TextUnformatted(startStr);
+	        
+	        // Draw end
+	        ImGui.SetCursorPosX(endStart);
+	        ImGui.SetCursorPosY(cursorY);
+	        ImGui.TextUnformatted(endStr);
+	        
+	        //Draw total
+	        ImGui.SetCursorPosX(totalStart);
+	        ImGui.SetCursorPosY(cursorY);
+	        ImGui.TextUnformatted(totalStr);
         }
     }
 }
