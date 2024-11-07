@@ -27,7 +27,7 @@ jobs:
           $ver = '${{ github.ref_name }}'
           invoke-expression 'dotnet build --no-restore --configuration Release --nologo -p:PluginVersion=$ver'
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           path: ./src/bin/Release/Chronofoil.Plugin/latest.zip
       - name: Create Release
