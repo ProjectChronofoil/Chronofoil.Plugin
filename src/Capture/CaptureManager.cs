@@ -115,6 +115,7 @@ public class CaptureManager
                 CaptureId = captureId,
                 StartTime = startTime,
                 EndTime = endTime,
+                FileSize = length,
                 IsUploaded = false,
                 IsIgnored = false
             };
