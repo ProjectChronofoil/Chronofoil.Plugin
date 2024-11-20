@@ -75,6 +75,8 @@ public class CaptureSessionManager : IDisposable
 		IsCapturing = true;
 	}
 
+	private void End(int type, int code) => End();
+
 	private void End()
 	{
 		_log.Debug("[CaptureSessionManager] End!");
