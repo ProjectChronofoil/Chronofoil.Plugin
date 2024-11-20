@@ -15,6 +15,7 @@ public class Configuration : IPluginConfiguration
 
     public bool EnableContext { get; set; } = false;
     public bool EnableUpload { get; set; } = false;
+    public bool EnableQuickUpload { get; set; } = false;
 
     public string AccessToken { get; set; } = "";
     public string RefreshToken { get; set; } = "";

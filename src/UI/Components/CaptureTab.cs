@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Chronofoil.Capture;
+using Chronofoil.Censor;
 using Chronofoil.Utility;
 using Chronofoil.Web;
+using Chronofoil.Web.Upload;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 
@@ -20,22 +20,31 @@ public class CaptureTab
     private readonly UploadModal _uploadModal;
     private readonly ChronofoilClient _client;
 
-    private HashSet<Guid> _remoteDeletions;
-    
+    private readonly HashSet<Guid> _remoteDeletions;
+    private readonly UploadService _uploadService;
+    private readonly OpcodeService _opcodeService;
+    private readonly INotificationManager _notificationManager;
+
     public CaptureTab(
 	    Configuration config,
 	    IPluginLog log,
 	    CaptureManager captureManager,
 	    UploadModal uploadModal,
-	    ChronofoilClient chronofoilClient)
+	    ChronofoilClient chronofoilClient,
+	    UploadService uploadService,
+	    OpcodeService opcodeService,
+	    INotificationManager notificationManager)
     {
         _config = config;
         _log = log;
         _captureManager = captureManager;
         _uploadModal = uploadModal;
         _client = chronofoilClient;
+        _uploadService = uploadService;
+        _opcodeService = opcodeService;
+        _notificationManager = notificationManager;
 
-        _remoteDeletions = new HashSet<Guid>();
+        _remoteDeletions = [];
     }
 
     public void Draw()
@@ -100,10 +109,19 @@ public class CaptureTab
 				if (ImGui.IsItemHovered())
 					ImGui.SetTooltip("Ignores this capture. Chronofoil will not notify you about non-uploaded, ignored captures, nor will it let you upload ignored captures.");
 				ImGui.TableNextColumn();
+
+				var quickUploadKeysDown = ImGui.IsKeyDown(ImGuiKey.LeftShift);
 				ImGui.BeginDisabled(ignored || capturing || uploaded || !_config.EnableUpload || !canUpload);
 				if (ImGui.Button($"Upload##{guid}_upload"))
 				{
-					_uploadModal.Begin(guid);
+					if (quickUploadKeysDown)
+					{
+						Task.Run(() => new BackgroundUpload(_log, _config, _uploadService, _opcodeService, _captureManager, _notificationManager).Upload(guid));
+					}
+					else
+					{
+						_uploadModal.Begin(guid);	
+					}
 				}
 				ImGui.EndDisabled();
 				
@@ -118,6 +136,8 @@ public class CaptureTab
 						ImGui.SetTooltip("To upload, turn on uploading in the settings tab.");
 					else if (!canUpload)
 						ImGui.SetTooltip("To upload, please Log In to the Chronofoil Service.");
+					else if (_config.EnableQuickUpload)
+						ImGui.SetTooltip("Hold Left Shift and click to quick upload.");
 				}
 
 				ImGui.TableNextColumn();
@@ -127,8 +147,8 @@ public class CaptureTab
 				// }
 				// ImGui.TableNextColumn();
 
-				var keysDown = ImGui.IsKeyDown(ImGuiKey.LeftShift) && ImGui.IsKeyDown(ImGuiKey.LeftCtrl);
-				ImGui.BeginDisabled(!keysDown);
+				var deleteKeysDown = ImGui.IsKeyDown(ImGuiKey.LeftShift) && ImGui.IsKeyDown(ImGuiKey.LeftCtrl);
+				ImGui.BeginDisabled(!deleteKeysDown);
 				if (ImGui.Button($"Delete##{guid}_delete"))
 				{
 					// TODO: make a delete modal? maybe?
@@ -136,7 +156,7 @@ public class CaptureTab
 				}
 				ImGui.EndDisabled();
 				var localDisabledHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
-				if (!keysDown && localDisabledHovered)
+				if (!deleteKeysDown && localDisabledHovered)
 				{
 					ImGui.SetTooltip("Hold Left Shift and Left Control at the same time to delete this capture. This is not reversible.");
 				}
@@ -144,7 +164,7 @@ public class CaptureTab
 				ImGui.TableNextColumn();
 
 				var taskInProgress = _remoteDeletions.Contains(guid);
-				ImGui.BeginDisabled(!keysDown || taskInProgress || !uploaded);
+				ImGui.BeginDisabled(!deleteKeysDown || taskInProgress || !uploaded);
 				if (ImGui.Button($"Delete from Server##{guid}_remote_delete"))
 				{
 					var task = Task.Run(() => _client.TryDeleteCapture(guid));
@@ -174,7 +194,7 @@ public class CaptureTab
 					{
 						ImGui.SetTooltip("Please wait...");
 					}
-					else if (!keysDown && uploaded)
+					else if (!deleteKeysDown && uploaded)
 					{
 						ImGui.SetTooltip("Hold Left Shift and Left Control at the same time to delete this capture from the server. This is not reversible.");
 					}

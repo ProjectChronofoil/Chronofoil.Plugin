@@ -2,8 +2,8 @@
 
 public class ProgressHolder
 {
-    public long Current { get; set; }
-    public long Total { get; set; }
+    private long Current { get; set; } = 0;
+    private long Total { get; set; } = 1;
 
     public void Set(long current, long total)
     {

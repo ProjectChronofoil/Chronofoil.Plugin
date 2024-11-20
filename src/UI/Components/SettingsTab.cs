@@ -17,6 +17,7 @@ public class SettingsTab
     private string _storageDirText = "";
     private bool _enableContext;
     private bool _enableUpload;
+    private bool _enableQuickUpload;
     private int _metricsTimeValue;
     private TimeSpanIdentifier _metricsTimeSpan;
     private bool _metricsWhenEos;
@@ -51,6 +52,7 @@ public class SettingsTab
                 _storageDirText = _config.StorageDirectory;
                 _enableContext = _config.EnableContext;
                 _enableUpload = _config.EnableUpload;
+                _enableQuickUpload = _config.EnableQuickUpload;
                 _metricsTimeValue = _config.MetricsTimeValue;
                 _metricsTimeSpan = _config.MetricsTimeSpan;
                 _metricsWhenEos = _config.MetricsWhenEos;
@@ -123,6 +125,18 @@ public class SettingsTab
         ImGui.TextUnformatted("Enable uploading:");
         ImGui.SameLine();
         ImGui.Checkbox("##cf_upload", ref _enableUpload);
+
+        _enableQuickUpload = _enableUpload && _enableQuickUpload;
+        ImGui.BeginDisabled(!_enableUpload);
+        ImGui.TextUnformatted("Enable Quick Upload:");
+        ImGui.SameLine();
+        ImGui.Checkbox("##cf_quick_upload", ref _enableQuickUpload);
+        ImGui.SameLine();
+        ImGuiComponents.HelpMarker("Quick Upload allows you to bypass the upload user interface and perform uploads " +
+                                   "in one click by holding Left Shift when clicking upload. The entire upload process " +
+                                   "will run in the background and use your default privacy settings. If all opcodes are " +
+                                   "not available for censoring, the warning will not appear, and the upload will continue.");
+        ImGui.EndDisabled();
         
         ImGui.BeginDisabled(!_enableUpload);
         ImGui.TextUnformatted("Default metrics time for uploads: ");
@@ -228,6 +242,7 @@ public class SettingsTab
          _config.StorageDirectory = _storageDirText;
          _config.EnableContext = _enableContext;
          _config.EnableUpload = _enableUpload;
+         _config.EnableQuickUpload = _enableQuickUpload;
          _config.MetricsTimeValue = _metricsTimeValue;
          _config.MetricsTimeSpan = _metricsTimeSpan;
          _config.MetricsWhenEos = _metricsWhenEos;
