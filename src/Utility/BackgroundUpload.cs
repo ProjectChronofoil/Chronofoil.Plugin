@@ -107,7 +107,7 @@ public class BackgroundUpload
         }
         catch (Exception e)
         {
-            Error("Failed to censor capture.", e);
+            Error($"Failed to censor capture {_captureId}", e);
             return result;
         }
         
@@ -128,7 +128,7 @@ public class BackgroundUpload
         }
         catch (Exception e)
         {
-            Error("Failed to upload capture.", e);
+            Error($"Failed to upload capture {_captureId}", e);
             return result;
         }
         
