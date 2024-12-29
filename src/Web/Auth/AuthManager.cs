@@ -32,7 +32,7 @@ public class AuthManager : IDisposable
         _log = log;
         _config = config;
         _client = client;
-        Task.Run(RefreshIfNeeded)
+        Task.Run(RefreshToken)
             .ContinueWith(task =>
             {
                 if (task.Exception == null)
@@ -46,6 +46,33 @@ public class AuthManager : IDisposable
     {
         _server?.Dispose();
         _server = null;
+    }
+
+    private void RefreshToken()
+    {
+        if (string.IsNullOrEmpty(_config.RefreshToken)) return;
+        
+        try
+        {
+            var tokenResult = _client.TryRefresh(_config.RefreshToken, out var tokens);
+            if (!tokenResult || tokens == null)
+            {
+                return;
+            }
+            
+            _config.AccessToken = tokens.AccessToken;
+            _config.RefreshToken = tokens.RefreshToken;
+            _config.TokenExpiryTime = DateTime.UtcNow.AddSeconds(tokens.ExpiresIn);
+            _config.Save();
+        }
+        catch (Exception e)
+        {
+            _log.Error(e, "[AuthManager] [RefreshToken] Something went wrong!");
+            _config.AccessToken = "";
+            _config.RefreshToken = "";
+            _config.TokenExpiryTime = DateTime.UtcNow.AddYears(2000);
+            _config.Save();
+        }
     }
 
     private void RefreshIfNeeded()
@@ -72,6 +99,7 @@ public class AuthManager : IDisposable
             _config.AccessToken = "";
             _config.RefreshToken = "";
             _config.TokenExpiryTime = DateTime.UtcNow.AddYears(2000);
+            _config.Save();
         }
     }
 
