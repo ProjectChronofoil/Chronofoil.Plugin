@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Dalamud.Game.Command;
 using Chronofoil.UI;
 using Chronofoil.UI.Components;
 using Chronofoil.Utility;
 using Chronofoil.Web.Auth;
+using Dalamud.Interface.Textures;
 using Dalamud.Plugin.Services;
 
 namespace Chronofoil;
@@ -47,9 +49,7 @@ public class Chronofoil
         try
         {
             const string resourceName = "Chronofoil.Data.icon_small.png";
-            var resource = Util.GetResource(resourceName);
-            _log.Verbose($"resource {resourceName} is {resource.Length} bytes");
-            var texture = textureProvider.CreateFromImageAsync(resource).Result;
+            var texture = textureProvider.GetFromManifestResource(Assembly.GetExecutingAssembly(), resourceName);
             titleScreenMenu.AddEntry("Chronofoil", texture, ui.ShowMainWindow);
         }
         catch (Exception e)

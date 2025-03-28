@@ -1,11 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Dalamud.NET.SDK/12.0.2">
   <PropertyGroup>
-    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     <PluginVersion>1.0.0.0</PluginVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Platforms>x64</Platforms>
     <Company>perchbird</Company>
     <AssemblyTitle>Chronofoil</AssemblyTitle>
@@ -42,26 +41,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="FFXIVClientStructs">
-      <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Dalamud">
-      <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ImGui.NET">
-      <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ImGuiScene">
-      <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="SharpDX.Direct3D11">
       <HintPath>$(DalamudLibPath)SharpDX.Direct3D11.dll</HintPath>
       <Private>false</Private>
@@ -74,7 +53,22 @@
       <HintPath>$(DalamudLibPath)SharpDX.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <PackageReference Include="DalamudPackager" Version="11.0.0" />
+    <Reference Include="Reloaded.Hooks">
+      <HintPath>$(DalamudLibPath)Reloaded.Hooks.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Reloaded.Hooks.Definitions">
+      <HintPath>$(DalamudLibPath)Reloaded.Hooks.Definitions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Reloaded.Assembler">
+      <HintPath>$(DalamudLibPath)Reloaded.Assembler.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Reloaded.Memory">
+      <HintPath>$(DalamudLibPath)Reloaded.Memory.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

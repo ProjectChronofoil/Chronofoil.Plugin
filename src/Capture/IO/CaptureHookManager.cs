@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Chronofoil.CaptureFile.Binary.Packet;
 using Chronofoil.CaptureFile.Generated;
@@ -8,6 +9,7 @@ using Chronofoil.Utility;
 using Dalamud.Game;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
+using Reloaded.Hooks.Definitions.X64;
 using static Chronofoil.CaptureFile.Binary.SpanExtensions;
 using Direction = Chronofoil.CaptureFile.Generated.Direction;
 
@@ -21,6 +23,10 @@ public unsafe class CaptureHookManager : IDisposable
 	private const string GenericTxSignature = "40 57 41 56 48 83 EC 38 48 8B F9 4C 8B F2";
 	private const string LobbyTxSignature = "40 53 48 83 EC 20 44 8B 41 28";
 
+	private const string OtherCreateTargetCaller =
+		"48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 50 48 8B FA 48 8B F1 0F B7 12";
+	private const string CreateTargetSignature = "3B 0D ?? ?? ?? ?? 74 0E";
+
 	public delegate void NetworkInitializedDelegate();
 	public event NetworkInitializedDelegate? NetworkInitialized;
 
@@ -30,7 +36,7 @@ public unsafe class CaptureHookManager : IDisposable
 	private delegate nuint RxPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5);
 	private delegate nuint TxPrototype(byte* data, nint a2);
 	private delegate void LobbyTxPrototype(nuint data);
-
+	
 	private readonly Hook<RxPrototype> _chatRxHook;
 	private readonly Hook<RxPrototype> _lobbyRxHook;
 	private readonly Hook<RxPrototype> _zoneRxHook;
@@ -38,10 +44,20 @@ public unsafe class CaptureHookManager : IDisposable
 	private readonly Hook<LobbyTxPrototype> _lobbyTxHook;
 	private readonly Hook<TxPrototype> _zoneTxHook;
 
+	private delegate byte OtherCreateTargetCallerPrototype(void* a1, void* a2, void* a3);
+	private readonly Hook<OtherCreateTargetCallerPrototype> _otherCreateTargetCallerHook;
+
+	[Function([FunctionAttribute.Register.rcx, FunctionAttribute.Register.rsi], FunctionAttribute.Register.rax, false)]
+	private delegate byte CreateTargetPrototype(int entityId, nint packetPtr);
+	private readonly Hook<CreateTargetPrototype> _createTargetHook;
+
 	private readonly IPluginLog _log;
 	private readonly LobbyEncryptionProvider _encryptionProvider;
 	private readonly INotificationManager _notificationManager;
 	private readonly SimpleBuffer _buffer;
+
+	private readonly Queue<PacketMetadata> _zoneRxIpcQueue;
+	private bool _ignoreCreateTarget;
 
 	public CaptureHookManager(
 		IPluginLog log,
@@ -56,6 +72,7 @@ public unsafe class CaptureHookManager : IDisposable
 		_notificationManager = notificationManager;
 		
 		_buffer = new SimpleBuffer(1024 * 1024);
+		_zoneRxIpcQueue = new Queue<PacketMetadata>();
 		
 		var lobbyKeyPtr = sigScanner.ScanText(LobbyKeySignature);
 		var lobbyKey = (ushort) *(int*)(lobbyKeyPtr + 3); // skip instructions and register offset
@@ -74,6 +91,13 @@ public unsafe class CaptureHookManager : IDisposable
 		
 		var lobbyTxPtr = multiScanner.ScanText(LobbyTxSignature, 1);
 		_lobbyTxHook = hooks.HookFromAddress<LobbyTxPrototype>(lobbyTxPtr[0], LobbyTxDetour);
+		
+		var createTargetPtr = sigScanner.ScanText(CreateTargetSignature);
+		_createTargetHook = hooks.HookFromAddress<CreateTargetPrototype>(createTargetPtr, CreateTargetDetour);
+		
+		var otherCreateTargetCallerPtr = sigScanner.ScanText(OtherCreateTargetCaller);
+		_otherCreateTargetCallerHook = hooks.
+			HookFromAddress<OtherCreateTargetCallerPrototype>(otherCreateTargetCallerPtr, OtherCreateTargetCallerDetour);
 
 		Enable();
 	}
@@ -86,6 +110,9 @@ public unsafe class CaptureHookManager : IDisposable
 		_chatTxHook?.Enable();
 		_zoneTxHook?.Enable();
 		_lobbyTxHook?.Enable();
+		
+		_createTargetHook?.Enable();
+		_otherCreateTargetCallerHook?.Enable();
 	}
 	
 	public void Disable()
@@ -96,6 +123,10 @@ public unsafe class CaptureHookManager : IDisposable
 		_chatTxHook?.Disable();
 		_zoneTxHook?.Disable();
 		_lobbyTxHook?.Disable();
+		
+		_createTargetHook?.Disable();
+		_otherCreateTargetCallerHook?.Disable();
+		_zoneRxIpcQueue.Clear();
 	}
 	
 	public void Dispose()
@@ -107,6 +138,60 @@ public unsafe class CaptureHookManager : IDisposable
 		_chatTxHook?.Dispose();
 		_lobbyTxHook?.Dispose();
 		_zoneTxHook?.Dispose();
+		
+		_createTargetHook?.Dispose();
+		_otherCreateTargetCallerHook?.Dispose();
+	}
+
+	// I know this is very silly, but I don't have access to the return address like Deucalion so uhh
+	// let me know if you know of a way I can get the return address in CreateTargetDetour and I'll fix it!
+	private byte OtherCreateTargetCallerDetour(void* a1, void* a2, void* a3)
+	{
+		_ignoreCreateTarget = true;
+		// _log.Debug($"[OtherCreateTargetCaller]: ignoring next CreateTarget");
+		return _otherCreateTargetCallerHook.Original(a1, a2, a3);
+	}
+	
+	private byte CreateTargetDetour(int entityId, nint packetPtr)
+	{
+		if (_ignoreCreateTarget)
+		{
+			_ignoreCreateTarget = false;
+			return _createTargetHook.Original(entityId, packetPtr);
+		}
+		
+		if (_zoneRxIpcQueue.Count == 0)
+		{
+			SendNotification($"[CreateTarget]: Please report this problem: no packets in queue");
+			return _createTargetHook.Original(entityId, packetPtr);
+		}
+		
+		var meta = _zoneRxIpcQueue.Dequeue();
+
+		if (meta.Source != entityId)
+		{
+			SendNotification($"[CreateTarget]: Please report this problem: srcId {entityId} | queuedSrcId {meta.Source}");
+		}
+
+		var data = new Span<byte>((byte*)packetPtr, meta.DataSize);
+		_buffer.Write(meta.Header);
+		_buffer.Write(data);
+
+		// We dequeued the final packet for this frame - commit the data
+		if (_zoneRxIpcQueue.Count == 0)
+			NetworkEvent?.Invoke(Protocol.Zone, Direction.Rx, _buffer.GetBuffer());
+		
+		return _createTargetHook.Original(entityId, packetPtr);
+	}
+
+	private void SendNotification(string content)
+	{
+		_notificationManager.AddNotification(new Notification
+		{
+			Content = content,
+			Title = "Chronofoil Info", 
+		});
+		_log.Debug($"[SendNotification] {content}");
 	}
 	
     private nuint ChatRxDetour(byte* data, byte* a2, nuint a3, nuint a4, nuint a5)
@@ -222,14 +307,21 @@ public unsafe class CaptureHookManager : IDisposable
             // _log.Debug($"frame compressed: {header.Compression} payload is {header.TotalSize - 40} bytes, decomp'd is {header.DecompressedLength}");
             return;
         }
+        
+        // Deobfuscation
+        var needsDeobfuscation = false;
 
         var offset = 0;
         for (int i = 0; i < header.Count; i++)
         {
 	        var pktHdrSize = Unsafe.SizeOf<PacketElementHeader>();
             var pktHdrSlice = data.Slice(offset, pktHdrSize);
-            _buffer.Write(pktHdrSlice); 
             var pktHdr = pktHdrSlice.Cast<byte, PacketElementHeader>();
+            
+            needsDeobfuscation = proto == Protocol.Zone && direction == Direction.Rx && pktHdr.Type is PacketType.Ipc;
+            
+            if (!needsDeobfuscation)
+				_buffer.Write(pktHdrSlice);
 
             // _log.Debug($"packet: type {pktHdr.Type}, {pktHdr.Size} bytes, {proto} {direction}, {pktHdr.SrcEntity} -> {pktHdr.DstEntity}");
             
@@ -251,14 +343,23 @@ public unsafe class CaptureHookManager : IDisposable
                 var decoded = _encryptionProvider.DecryptPacket(pktData);
                 pktData = new Span<byte>(decoded);
             }
-            
-            _buffer.Write(pktData);
+
+            if (needsDeobfuscation)
+            {
+	            var meta = new PacketMetadata(pktHdr.SrcEntity, pktData.Length, pktHdrSlice);
+	            _zoneRxIpcQueue.Enqueue(meta);
+            }
+            else
+            {
+	            _buffer.Write(pktData);
+            }
             
             // _log.Debug($"packet: type {pktHdr.Type}, {pktHdr.Size} bytes, {pktHdr.SrcEntity} -> {pktHdr.DstEntity}");
             offset += (int)pktHdr.Size;
         }
         
         // _log.Debug($"[{proto}{direction}] invoking network event header size {header.TotalSize} usize {header.DecompressedLength} buffer size {_buffer.GetBuffer().Length}");
-        NetworkEvent?.Invoke(proto, direction, _buffer.GetBuffer());
+        if (!needsDeobfuscation)
+			NetworkEvent?.Invoke(proto, direction, _buffer.GetBuffer());
     }
 }
