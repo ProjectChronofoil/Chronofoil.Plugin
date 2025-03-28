@@ -23,6 +23,8 @@ public unsafe class CaptureHookManager : IDisposable
 	private const string GenericTxSignature = "40 57 41 56 48 83 EC 38 48 8B F9 4C 8B F2";
 	private const string LobbyTxSignature = "40 53 48 83 EC 20 44 8B 41 28";
 
+	private const string OtherCreateTargetCaller =
+		"48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 50 48 8B FA 48 8B F1 0F B7 12";
 	private const string CreateTargetSignature = "3B 0D ?? ?? ?? ?? 74 0E";
 
 	public delegate void NetworkInitializedDelegate();
@@ -41,7 +43,10 @@ public unsafe class CaptureHookManager : IDisposable
 	private readonly Hook<TxPrototype> _chatTxHook;
 	private readonly Hook<LobbyTxPrototype> _lobbyTxHook;
 	private readonly Hook<TxPrototype> _zoneTxHook;
-	
+
+	private delegate byte OtherCreateTargetCallerPrototype(void* a1, void* a2, void* a3);
+	private readonly Hook<OtherCreateTargetCallerPrototype> _otherCreateTargetCallerHook;
+
 	[Function([FunctionAttribute.Register.rcx, FunctionAttribute.Register.rsi], FunctionAttribute.Register.rax, false)]
 	private delegate byte CreateTargetPrototype(int entityId, nint packetPtr);
 	private readonly Hook<CreateTargetPrototype> _createTargetHook;
@@ -52,6 +57,7 @@ public unsafe class CaptureHookManager : IDisposable
 	private readonly SimpleBuffer _buffer;
 
 	private readonly Queue<PacketMetadata> _zoneRxIpcQueue;
+	private bool _ignoreCreateTarget;
 
 	public CaptureHookManager(
 		IPluginLog log,
@@ -88,6 +94,10 @@ public unsafe class CaptureHookManager : IDisposable
 		
 		var createTargetPtr = sigScanner.ScanText(CreateTargetSignature);
 		_createTargetHook = hooks.HookFromAddress<CreateTargetPrototype>(createTargetPtr, CreateTargetDetour);
+		
+		var otherCreateTargetCallerPtr = sigScanner.ScanText(OtherCreateTargetCaller);
+		_otherCreateTargetCallerHook = hooks.
+			HookFromAddress<OtherCreateTargetCallerPrototype>(otherCreateTargetCallerPtr, OtherCreateTargetCallerDetour);
 
 		Enable();
 	}
@@ -102,6 +112,7 @@ public unsafe class CaptureHookManager : IDisposable
 		_lobbyTxHook?.Enable();
 		
 		_createTargetHook?.Enable();
+		_otherCreateTargetCallerHook?.Enable();
 	}
 	
 	public void Disable()
@@ -114,6 +125,8 @@ public unsafe class CaptureHookManager : IDisposable
 		_lobbyTxHook?.Disable();
 		
 		_createTargetHook?.Disable();
+		_otherCreateTargetCallerHook?.Disable();
+		_zoneRxIpcQueue.Clear();
 	}
 	
 	public void Dispose()
@@ -127,22 +140,40 @@ public unsafe class CaptureHookManager : IDisposable
 		_zoneTxHook?.Dispose();
 		
 		_createTargetHook?.Dispose();
+		_otherCreateTargetCallerHook?.Dispose();
+	}
+
+	// I know this is very silly, but I don't have access to the return address like Deucalion so uhh
+	// let me know if you know of a way I can get the return address in CreateTargetDetour and I'll fix it!
+	private byte OtherCreateTargetCallerDetour(void* a1, void* a2, void* a3)
+	{
+		_ignoreCreateTarget = true;
+		// _log.Debug($"[OtherCreateTargetCaller]: ignoring next CreateTarget");
+		return _otherCreateTargetCallerHook.Original(a1, a2, a3);
 	}
 	
 	private byte CreateTargetDetour(int entityId, nint packetPtr)
 	{
-		_log.Debug($"[CreateTarget]: {entityId} packet: {packetPtr:X}");
+		if (_ignoreCreateTarget)
+		{
+			_ignoreCreateTarget = false;
+			return _createTargetHook.Original(entityId, packetPtr);
+		}
 		
 		if (_zoneRxIpcQueue.Count == 0)
 		{
-			_log.Debug($"[CreateTarget]: no packets in queue, returning");
+			SendNotification($"[CreateTarget]: Please report this problem: no packets in queue");
 			return _createTargetHook.Original(entityId, packetPtr);
 		}
 		
 		var meta = _zoneRxIpcQueue.Dequeue();
-		_log.Debug($"[CreateTarget]: srcId: {entityId} | queuedSrcId: {meta.Source}");
 
-		var data = new Span<byte>((byte*)packetPtr, (int)meta.DataSize);
+		if (meta.Source != entityId)
+		{
+			SendNotification($"[CreateTarget]: Please report this problem: srcId {entityId} | queuedSrcId {meta.Source}");
+		}
+
+		var data = new Span<byte>((byte*)packetPtr, meta.DataSize);
 		_buffer.Write(meta.Header);
 		_buffer.Write(data);
 
@@ -151,6 +182,16 @@ public unsafe class CaptureHookManager : IDisposable
 			NetworkEvent?.Invoke(Protocol.Zone, Direction.Rx, _buffer.GetBuffer());
 		
 		return _createTargetHook.Original(entityId, packetPtr);
+	}
+
+	private void SendNotification(string content)
+	{
+		_notificationManager.AddNotification(new Notification
+		{
+			Content = content,
+			Title = "Chronofoil Info", 
+		});
+		_log.Debug($"[SendNotification] {content}");
 	}
 	
     private nuint ChatRxDetour(byte* data, byte* a2, nuint a3, nuint a4, nuint a5)
@@ -251,7 +292,7 @@ public unsafe class CaptureHookManager : IDisposable
         // _log.Debug($"PacketsFromFrame: writing {header.Count} packets");
         var span = new Span<byte>(framePtr, (int)header.TotalSize);
         
-        _log.Debug($"[{(nuint)framePtr:X}] [{proto}{direction}] proto {header.Protocol} unk {header.Unknown}, {header.Count} pkts size {header.TotalSize} usize {header.DecompressedLength}");
+        // _log.Debug($"[{(nuint)framePtr:X}] [{proto}{direction}] proto {header.Protocol} unk {header.Unknown}, {header.Count} pkts size {header.TotalSize} usize {header.DecompressedLength}");
         
         var data = span.Slice(headerSize, (int)header.TotalSize - headerSize);
         
@@ -282,7 +323,7 @@ public unsafe class CaptureHookManager : IDisposable
             if (!needsDeobfuscation)
 				_buffer.Write(pktHdrSlice);
 
-            _log.Debug($"packet: type {pktHdr.Type}, {pktHdr.Size} bytes, {proto} {direction}, {pktHdr.SrcEntity} -> {pktHdr.DstEntity}");
+            // _log.Debug($"packet: type {pktHdr.Type}, {pktHdr.Size} bytes, {proto} {direction}, {pktHdr.SrcEntity} -> {pktHdr.DstEntity}");
             
             var pktData = data.Slice(offset + pktHdrSize, (int)pktHdr.Size - pktHdrSize);
 
