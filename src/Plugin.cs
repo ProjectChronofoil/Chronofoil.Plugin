@@ -45,6 +45,7 @@ public class Plugin : IDalamudPlugin
 				.AddDalamudService<IClientState>(pi)
 				.AddDalamudService<ICommandManager>(pi)
 				.AddDalamudService<IGameGui>(pi)
+				.AddDalamudService<IChatGui>(pi)
 				.AddDalamudService<ISigScanner>(pi)
 				.AddDalamudService<ITextureProvider>(pi)
 				.AddDalamudService<IGameInteropProvider>(pi)
