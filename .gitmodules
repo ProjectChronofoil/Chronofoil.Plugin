@@ -4,3 +4,6 @@
 [submodule "deps/Chronofoil.Common"]
 	path = deps/Chronofoil.Common
 	url = https://github.com/ProjectChronofoil/Chronofoil.Common.git
+[submodule "deps/Unscrambler"]
+	path = deps/Unscrambler
+	url = https://github.com/perchbirdd/Unscrambler.git

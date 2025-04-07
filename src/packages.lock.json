@@ -418,6 +418,9 @@
       },
       "chronofoil.common": {
         "type": "Project"
+      },
+      "unscrambler": {
+        "type": "Project"
       }
     }
   }
