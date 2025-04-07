@@ -49,6 +49,7 @@ public unsafe class CaptureHookManager : IDisposable
 	private readonly INotificationManager _notificationManager;
 	private readonly SimpleBuffer _buffer;
 
+	private bool _enabled;
 	private bool _obfuscationOverride;
 	private readonly VersionConstants _versionConstants;
 	private readonly IKeyGenerator _keyGenerator;
@@ -71,25 +72,6 @@ public unsafe class CaptureHookManager : IDisposable
 		_versionConstants = VersionConstants.ForGameVersion(version);
 		_keyGenerator = KeyGeneratorFactory.ForGameVersion(version);
 		_unscrambler = UnscramblerFactory.ForGameVersion(version);
-
-		var dispatcher = PacketDispatcher.GetInstance();
-		if (dispatcher != null)
-		{
-			var gameRandom = dispatcher->GameRandom;
-			var packetRandom = dispatcher->LastPacketRandom;
-			_keyGenerator.Keys[0] = (byte)(dispatcher->Key0 - gameRandom - packetRandom);
-			_keyGenerator.Keys[1] = (byte)(dispatcher->Key1 - gameRandom - packetRandom);
-			_keyGenerator.Keys[2] = (byte)(dispatcher->Key2 - gameRandom - packetRandom);
-			_obfuscationOverride = dispatcher->Key0 >= gameRandom + packetRandom;
-
-			_log.Debug($"[CaptureHooks] Obfuscation override is {_obfuscationOverride}");
-			_log.Debug($"[CaptureHooks] keys {dispatcher->Key0}, {dispatcher->Key1}, {dispatcher->Key2}");
-            _log.Debug($"[CaptureHooks] game random {dispatcher->GameRandom}, packet random {dispatcher->LastPacketRandom}");
-		}
-		else
-		{
-			_log.Debug("[CaptureHooks] Dispatcher was null, so not initializing keys");
-		}
 		
 		var lobbyKeyPtr = sigScanner.ScanText(LobbyKeySignature);
 		var lobbyKey = (ushort) *(int*)(lobbyKeyPtr + 3); // skip instructions and register offset
@@ -114,6 +96,36 @@ public unsafe class CaptureHookManager : IDisposable
 
 	public void Enable()
 	{
+		var dispatcher = PacketDispatcher.GetInstance();
+		if (dispatcher != null)
+		{
+			var gameRandom = dispatcher->GameRandom;
+			var packetRandom = dispatcher->LastPacketRandom;
+			
+			_obfuscationOverride = dispatcher->Key0 >= gameRandom + packetRandom;
+
+			if (_obfuscationOverride)
+			{
+				_keyGenerator.Keys[0] = (byte)(dispatcher->Key0 - gameRandom - packetRandom);
+				_keyGenerator.Keys[1] = (byte)(dispatcher->Key1 - gameRandom - packetRandom);
+				_keyGenerator.Keys[2] = (byte)(dispatcher->Key2 - gameRandom - packetRandom);	
+			}
+			else
+			{
+				_keyGenerator.Keys[0] = 0;
+				_keyGenerator.Keys[1] = 0;
+				_keyGenerator.Keys[2] = 0;
+			}
+			
+			_log.Debug($"[Enable] obfuscation override is {_obfuscationOverride}");
+			_log.Debug($"[Enable] keys {dispatcher->Key0}, {dispatcher->Key1}, {dispatcher->Key2}");
+			_log.Debug($"[Enable] game random {dispatcher->GameRandom}, packet random {dispatcher->LastPacketRandom}");
+		}
+		else
+		{
+			_log.Debug("[Enable] Dispatcher was null, so not initializing keys");
+		}
+		
 		_chatRxHook?.Enable();
 		_zoneRxHook?.Enable();
 		_lobbyRxHook?.Enable();
