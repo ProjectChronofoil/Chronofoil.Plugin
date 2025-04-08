@@ -35,7 +35,12 @@ public class AutoUploadService
 
     public void Begin()
     {
-        if (!_config.EnableAutoUpload) return;
+        var shouldRun = !string.IsNullOrEmpty(_config.AccessToken) &&
+                        _config.TokenExpiryTime > DateTime.UtcNow &&
+                        _config.EnableUpload &&
+                        _config.EnableAutoUpload;
+        
+        if (!shouldRun) return;
         
         Task.Run(PerformUpload);
     }

@@ -28,9 +28,9 @@ Current censored fields are:
 
 You can opt to not use the plugin at all, or you can utilize the plugin, but not opt to upload any captures. Uploading
 is disabled by default, and you cannot upload until you sign in with an external auth provider (currently only Discord is supported)
-and accept the Terms of Service of Chronofoil Services. Uploading is manual and per-capture; there is no "automatic upload" of any kind.
-You don't need to register in order to capture packets for your own purposes, nor are you beholden to any terms other than the license
-of this software when using it for personal use.
+and accept the Terms of Service of Chronofoil Services. Uploading is normally manual and per-capture, but there is an automatic
+upload "hidden setting" in the plugin's config file, which is off by default, of course. You don't need to register in
+order to capture packets for your own purposes, nor are you beholden to any terms other than the license of this software when using it for personal use.
 
 The way Chronofoil is designed is to record all traffic. Therefore, it is not possible, at the design level, to remove certain
 players from these collected packets. I am sorry.
