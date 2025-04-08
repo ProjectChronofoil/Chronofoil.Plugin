@@ -6,6 +6,7 @@ using Chronofoil.UI;
 using Chronofoil.UI.Components;
 using Chronofoil.Utility;
 using Chronofoil.Web.Auth;
+using Chronofoil.Web.Upload;
 using Dalamud.Interface.Textures;
 using Dalamud.Plugin.Services;
 
@@ -29,6 +30,7 @@ public class Chronofoil
         AuthManager authManager,
         NewTosModal tosModal,
         TitleScreenWaiter waiter,
+        AutoUploadService autoUploadService,
         ChronofoilUI ui)
     {
         _log = log;
@@ -37,6 +39,7 @@ public class Chronofoil
 
         PrepareTitleScreenIcon(textureProvider, titleScreenMenu, ui);
         waiter.OnTitleScreenAppeared += () => Task.Run(() => CheckAndWarnNewTos(authManager, tosModal));
+        waiter.OnTitleScreenAppeared += autoUploadService.Begin;
         
         _commandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
