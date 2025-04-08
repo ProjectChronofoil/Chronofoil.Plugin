@@ -75,6 +75,7 @@
   <ItemGroup>
     <ProjectReference Include="..\deps\Chronofoil.CaptureFile\src\Chronofoil.CaptureFile.csproj" />
     <ProjectReference Include="..\deps\Chronofoil.Common\src\Chronofoil.Common.csproj" />
+    <ProjectReference Include="..\deps\Unscrambler\Unscrambler\Unscrambler.csproj" />
   </ItemGroup>
 
   <ItemGroup>
