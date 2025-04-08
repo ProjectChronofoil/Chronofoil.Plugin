@@ -74,6 +74,7 @@ public class Plugin : IDalamudPlugin
 				.AddSingleton<TitleScreenWaiter>()
 				.AddSingleton<ChronofoilUI>()
 				.AddSingleton<OpcodeService>()
+				.AddSingleton<AutoUploadService>()
 				.AddSingleton<Chronofoil>();
 		});
 		
