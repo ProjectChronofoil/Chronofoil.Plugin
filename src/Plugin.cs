@@ -1,8 +1,13 @@
-﻿using Chronofoil.Capture;
+﻿using System;
+using System.Net.Http.Headers;
+using System.Reflection;
+using System.Threading.Tasks;
+using Chronofoil.Capture;
 using Chronofoil.Capture.Context;
 using Chronofoil.Capture.IO;
 using Chronofoil.Capture.Session;
 using Chronofoil.Censor;
+using Chronofoil.Common;
 using Chronofoil.Lobby;
 using Chronofoil.UI;
 using Chronofoil.UI.Components;
@@ -17,6 +22,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Refit;
 
 namespace Chronofoil;
 
@@ -36,11 +42,13 @@ public class Plugin : IDalamudPlugin
 		{
 			var configuration = pi.GetPluginConfig() as Configuration ?? new Configuration();
 			configuration.Initialize(pi);
-			
+
 			services
 				.AddExistingService(pi)
 				.AddExistingService(pi.UiBuilder)
-				.AddExistingService(configuration)
+				.AddExistingService(configuration);
+
+			services
 				.AddDalamudService<IFramework>(pi)
 				.AddDalamudService<IClientState>(pi)
 				.AddDalamudService<ICommandManager>(pi)
@@ -51,7 +59,22 @@ public class Plugin : IDalamudPlugin
 				.AddDalamudService<IGameInteropProvider>(pi)
 				.AddDalamudService<IPluginLog>(pi)
 				.AddDalamudService<INotificationManager>(pi)
-				.AddDalamudService<ITitleScreenMenu>(pi)
+				.AddDalamudService<ITitleScreenMenu>(pi);
+
+			services
+				.AddRefitClient<IChronofoilClient>(new RefitSettings
+				{
+					ExceptionFactory = _ => Task.FromResult<Exception?>(null)
+				})
+				.ConfigureHttpClient(c =>
+				{
+					c.BaseAddress = new Uri("https://cf-stg.perchbird.dev");
+					var version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+					var header = new ProductInfoHeaderValue("Chronofoil.Plugin", version);
+					c.DefaultRequestHeaders.UserAgent.Add(header);
+				});
+				
+			services
 				.AddSingleton<MultiSigScanner>()
 				.AddSingleton<CaptureHookManager>()
 				.AddSingleton<CaptureSessionManager>()

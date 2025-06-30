@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Chronofoil.Common;
 using Chronofoil.Common.Auth;
 using Dalamud.Plugin.Services;
 using EmbedIO;
@@ -16,7 +17,8 @@ public class AuthManager : IDisposable
         Register,
         Login,
     }
-    private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237235845736562728&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
+    // private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237235845736562728&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
+    private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237782923227299923&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
     
     private readonly IPluginLog _log;
     private readonly Configuration _config;
@@ -35,7 +37,7 @@ public class AuthManager : IDisposable
         Task.Run(RefreshToken)
             .ContinueWith(task =>
             {
-                if (task.Exception == null)
+                if (task.Exception == null && task.Result)
                     _log.Info("Refresh succeeded.");
                 else
                     _log.Error($"Refresh failed: {task.Exception}");
@@ -48,22 +50,23 @@ public class AuthManager : IDisposable
         _server = null;
     }
 
-    private void RefreshToken()
+    private bool RefreshToken()
     {
-        if (string.IsNullOrEmpty(_config.RefreshToken)) return;
+        if (string.IsNullOrEmpty(_config.RefreshToken)) return false;
         
         try
         {
             var tokenResult = _client.TryRefresh(_config.RefreshToken, out var tokens);
             if (!tokenResult || tokens == null)
             {
-                return;
+                return false;
             }
             
             _config.AccessToken = tokens.AccessToken;
             _config.RefreshToken = tokens.RefreshToken;
             _config.TokenExpiryTime = DateTime.UtcNow.AddSeconds(tokens.ExpiresIn);
             _config.Save();
+            return true;
         }
         catch (Exception e)
         {
@@ -73,34 +76,7 @@ public class AuthManager : IDisposable
             _config.TokenExpiryTime = DateTime.UtcNow.AddYears(2000);
             _config.Save();
         }
-    }
-
-    private void RefreshIfNeeded()
-    {
-        if (string.IsNullOrEmpty(_config.RefreshToken)) return;
-        if (DateTime.UtcNow < _config.TokenExpiryTime) return;
-        
-        try
-        {
-            var tokenResult = _client.TryRefresh(_config.RefreshToken, out var tokens);
-            if (!tokenResult || tokens == null)
-            {
-                return;
-            }
-            
-            _config.AccessToken = tokens.AccessToken;
-            _config.RefreshToken = tokens.RefreshToken;
-            _config.TokenExpiryTime = DateTime.UtcNow.AddSeconds(tokens.ExpiresIn);
-            _config.Save();
-        }
-        catch (Exception e)
-        {
-            _log.Error(e, "[AuthManager] [RefreshIfNeeded] Something went wrong!");
-            _config.AccessToken = "";
-            _config.RefreshToken = "";
-            _config.TokenExpiryTime = DateTime.UtcNow.AddYears(2000);
-            _config.Save();
-        }
+        return false;
     }
 
     public void Register(IAuthListener listener)
@@ -125,17 +101,18 @@ public class AuthManager : IDisposable
     {
         try
         {
-            AccessTokenResponse? tokens = null;
+            AccessTokenResponse? tokens;
+            ApiStatusCode? code;
             var tokenResult = _type switch
             {
-                AuthType.Login => _client.TryLogin(authCode, out tokens),
-                AuthType.Register => _client.TryRegister(authCode, out tokens),
+                AuthType.Login => _client.TryLogin(authCode, out tokens, out code),
+                AuthType.Register => _client.TryRegister(authCode, out tokens, out code),
                 _ => throw new ArgumentOutOfRangeException()
             };
             
             if (!tokenResult || tokens == null)
             {
-                _listener?.Error("Auth failed.");
+                _listener?.Error($"Auth failed: {code}");
                 return;
             }
             
@@ -156,10 +133,13 @@ public class AuthManager : IDisposable
         }
         finally
         {
-            _listener = null;
-            _server?.Dispose();
-            _server = null;
-            _type = AuthType.None;
+            Task.Delay(5000)
+                .ContinueWith(_ => {
+                _listener = null;
+                _server?.Dispose();
+                _server = null;
+                _type = AuthType.None;
+            });
         }
     }
     
