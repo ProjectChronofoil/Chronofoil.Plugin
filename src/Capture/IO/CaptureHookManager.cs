@@ -289,7 +289,7 @@ public unsafe class CaptureHookManager : IDisposable
 
             var canInitDeobfuscation = proto == Protocol.Zone &&
                                        direction == Direction.Rx &&
-                                       pktOpcode == _versionConstants.InitZoneOpcode;
+                                       (pktOpcode == _versionConstants.InitZoneOpcode || pktOpcode == _versionConstants.UnknownObfuscationInitOpcode);
             var needsDeobfuscation = proto == Protocol.Zone &&
                                      direction == Direction.Rx &&
                                      _versionConstants.ObfuscatedOpcodes.ContainsValue(pktOpcode);
@@ -302,7 +302,15 @@ public unsafe class CaptureHookManager : IDisposable
 
             if (canInitDeobfuscation)
             {
-	            _keyGenerator.Generate(pktData);
+	            if (pktOpcode == _versionConstants.InitZoneOpcode)
+	            {
+					_keyGenerator.GenerateFromInitZone(pktData);    
+	            }
+	            else if (pktOpcode == _versionConstants.UnknownObfuscationInitOpcode)
+	            {
+		            _keyGenerator.GenerateFromUnknownInitializer(pktData);
+	            }
+	            
 	            _obfuscationOverride = false;
             }
             
