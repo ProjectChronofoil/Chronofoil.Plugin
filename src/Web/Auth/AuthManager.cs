@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Chronofoil.Common.Auth;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 using EmbedIO;
 using EmbedIO.Routing;
@@ -19,6 +20,7 @@ public class AuthManager : IDisposable
     private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237235845736562728&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
     
     private readonly IPluginLog _log;
+    private readonly INotificationManager _notificationManager;
     private readonly Configuration _config;
     private readonly ChronofoilClient _client;
     
@@ -27,9 +29,10 @@ public class AuthManager : IDisposable
 
     private AuthType _type = AuthType.None;
 
-    public AuthManager(IPluginLog log, Configuration config, ChronofoilClient client)
+    public AuthManager(IPluginLog log, INotificationManager notificationManager, Configuration config, ChronofoilClient client)
     {
         _log = log;
+        _notificationManager = notificationManager;
         _config = config;
         _client = client;
         Task.Run(RefreshToken)
@@ -68,10 +71,23 @@ public class AuthManager : IDisposable
         catch (Exception e)
         {
             _log.Error(e, "[AuthManager] [RefreshToken] Something went wrong!");
+            
+            if (DateTime.UtcNow.AddHours(12) < _config.TokenExpiryTime)
+            {
+                _log.Verbose("[AuthManager] [RefreshToken] Refresh is not urgent, so not resetting auth.");
+                return;
+            }
+            
             _config.AccessToken = "";
             _config.RefreshToken = "";
             _config.TokenExpiryTime = DateTime.UtcNow.AddYears(2000);
             _config.Save();
+            _notificationManager.AddNotification(new Notification
+            {
+                Type = NotificationType.Warning,
+                Title = "Chronofoil",
+                Content = "You have been logged out of the Chronofoil Service."
+            });
         }
     }
 
