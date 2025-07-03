@@ -85,7 +85,7 @@ public class AuthManager : IDisposable
             _notificationManager.AddNotification(new Notification
             {
                 Type = NotificationType.Warning,
-                Title = "Chronofoil",
+                Title = "Logged Out",
                 Content = "You have been logged out of the Chronofoil Service."
             });
         }
