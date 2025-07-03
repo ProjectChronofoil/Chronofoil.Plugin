@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Chronofoil.Capture;
 using Chronofoil.Censor;
 using Chronofoil.Utility;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 
 namespace Chronofoil.Web.Upload;
@@ -39,8 +40,21 @@ public class AutoUploadService
                         _config.TokenExpiryTime > DateTime.UtcNow &&
                         _config.EnableUpload &&
                         _config.EnableAutoUpload;
-        
-        if (!shouldRun) return;
+
+        if (!shouldRun)
+        {
+            if (string.IsNullOrEmpty(_config.AccessToken))
+            {
+                _notificationManager.AddNotification(new Notification
+                {
+                    Type = NotificationType.Warning,
+                    Title = "Chronofoil",
+                    Content = "Warning: You have auto-upload enabled, but you are not logged in to the Chronofoil Service."
+                });
+            }
+            
+            return;
+        }
         
         Task.Run(PerformUpload);
     }
