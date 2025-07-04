@@ -43,7 +43,7 @@ public class AutoUploadService
 
         if (!shouldRun)
         {
-            if (string.IsNullOrEmpty(_config.AccessToken))
+            if (string.IsNullOrEmpty(_config.AccessToken) && _config.EnableAutoUpload)
             {
                 _notificationManager.AddNotification(new Notification
                 {
