@@ -10,3 +10,7 @@ description: |-
   requires two levels of user opt-in, has minimum delays on releasing any submitted user info,
   and allows users to delete their submitted data at any time.
 repo_url: https://github.com/ProjectChronofoil/Chronofoil.Plugin
+tags:
+  - Chronofoil
+  - Capture
+  - Analysis
