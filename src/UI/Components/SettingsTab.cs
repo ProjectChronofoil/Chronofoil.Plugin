@@ -85,9 +85,9 @@ public class SettingsTab
     {
         Validate();
         
-        ImGui.TextUnformatted("Main Settings");
+        ImGui.TextUnformatted("Main");
         
-        ImGui.TextUnformatted("Chronofoil storage directory:");
+        ImGui.TextUnformatted("Chronofoil Storage Directory:");
         ImGui.SameLine();
         ImGui.InputText("##cf_storage_dir", ref _storageDirText, 255);
         ImGui.SameLine();
@@ -102,126 +102,132 @@ public class SettingsTab
         
         ImGui.Separator();
 
-        ImGui.TextUnformatted("Notification Settings");
-        ImGui.TextUnformatted("Notifications:");
+        ImGui.TextUnformatted("Notifications");
+        ImGui.TextUnformatted("Enable Notifications:");
         ImGui.SameLine();
         ImGui.Checkbox("##cf_notifications", ref _notificationsEnabled);
-        ImGui.TextUnformatted("Capture Start notifications:");
-        ImGui.SameLine();
-        ImGui.Checkbox("##cf_start_notifications", ref _captureBeginNotificationsEnabled);
-        ImGui.TextUnformatted("Capture End notifications:");
-        ImGui.SameLine();
-        ImGui.Checkbox("##cf_end_notifications", ref _captureEndNotificationsEnabled);
-        ImGui.BeginDisabled(!_enableUpload);
-        ImGui.TextUnformatted("Remind me on startup if I have non-ignored, non-uploaded captures:");
-        ImGui.SameLine();
-        ImGui.Checkbox("##cf_capture_reminder_notifications", ref _uploadCapturesNotificationsEnabled);
-        ImGui.EndDisabled();
+        if (_notificationsEnabled) {
+            ImGui.Indent();
+            ImGui.TextUnformatted("On Capture Start:");
+            ImGui.SameLine();
+            ImGui.Checkbox("##cf_start_notifications", ref _captureBeginNotificationsEnabled);
+            ImGui.TextUnformatted("On Capture End:");
+            ImGui.SameLine();
+            ImGui.Checkbox("##cf_end_notifications", ref _captureEndNotificationsEnabled);
+            if (_enableUpload) {
+                ImGui.TextUnformatted("Remind me on startup if I have non-ignored, non-uploaded captures:");
+                ImGui.SameLine();
+                ImGui.Checkbox("##cf_capture_reminder_notifications", ref _uploadCapturesNotificationsEnabled);
+            }
+            ImGui.Unindent();
+        }
         
         ImGui.Separator();
         
-        ImGui.TextUnformatted("Upload Settings");
+        ImGui.TextUnformatted("Uploads");
         
-        ImGui.TextUnformatted("Enable uploading:");
+        ImGui.TextUnformatted("Enable Uploading:");
         ImGui.SameLine();
         ImGui.Checkbox("##cf_upload", ref _enableUpload);
 
         _enableQuickUpload = _enableUpload && _enableQuickUpload;
-        ImGui.BeginDisabled(!_enableUpload);
-        ImGui.TextUnformatted("Enable Quick Upload:");
-        ImGui.SameLine();
-        ImGui.Checkbox("##cf_quick_upload", ref _enableQuickUpload);
-        ImGui.SameLine();
-        ImGuiComponents.HelpMarker("Quick Upload allows you to bypass the upload user interface and perform uploads " +
-                                   "in one click by holding Left Shift when clicking upload. The entire upload process " +
-                                   "will run in the background and use your default privacy settings. If all opcodes are " +
-                                   "not available for censoring, the warning will not appear, and the upload will continue.");
-        ImGui.EndDisabled();
-        
-        ImGui.BeginDisabled(!_enableUpload);
-        ImGui.TextUnformatted("Default metrics time for uploads: ");
-        ImGui.SameLine();
-        ImGuiComponents.HelpMarker("The 'metrics time' is how long from the time of upload that it will take for your captures to appear in " +
-                                   "the Chronofoil metrics system for developers to query. This does not prevent an individual from querying " +
-                                   "the metrics system and recreating your capture, but it makes it incredibly difficult, while still providing " +
-                                   "useful information to developers. This setting is your default time and will be set automatically for uploads," +
-                                   " but can be overridden at upload time.");
-        ImGui.BeginDisabled(_metricsWhenEos);
-        ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
-        ImGui.InputInt("##cf_metric_time_value", ref _metricsTimeValue);
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
-        if (ImGui.BeginCombo("##cf_metric_time_identifier", _metricsTimeSpan.ToString()))
-        {
-            foreach (var tsId in Enum.GetValues<TimeSpanIdentifier>())
-                if (ImGui.Selectable(tsId.ToString()))
-                    _metricsTimeSpan = tsId;
-            ImGui.EndCombo();   
-        }
-        ImGui.EndDisabled();
-        ImGui.SameLine();
-        ImGui.Checkbox("Do not add my captures to the metrics system until FFXIV is End of Service##cf_metric_time_eos", ref _metricsWhenEos);
-        if (!_metricsTimeValid)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Metrics time is 7 days from the date of upload.");
-        
-        ImGui.TextUnformatted("Default 'public' time for uploads: ");
-        ImGui.SameLine();
-        ImGuiComponents.HelpMarker("The 'public time' is how long from the time of upload that it will take for your captures to be" +
-                                   " available for raw download. This provides the full capture file to individuals, which allows them to do" +
-                                   " whatever - extract information, places visited, or even replay the packet capture on their own machine " +
-                                   "if they have that capability. This setting is your default time and will be set automatically for uploads, " +
-                                   "but can be overridden at upload time");
-        ImGui.BeginDisabled(_publicWhenEos);
-        ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
-        ImGui.InputInt("##cf_public_time_value", ref _publicTimeValue);
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
-        if (ImGui.BeginCombo("##cf_public_time_identifier", _publicTimeSpan.ToString()))
-        {
-            foreach (var tsId in Enum.GetValues<TimeSpanIdentifier>())
-                if (ImGui.Selectable(tsId.ToString()))
-                    _publicTimeSpan = tsId;
-            ImGui.EndCombo();   
-        }
-        ImGui.EndDisabled();
-        ImGui.SameLine();
-        ImGui.Checkbox("Do not make my captures public until FFXIV is End of Service##cf_public_time_eos", ref _publicWhenEos);
-        if (!_publicTimeValid)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Public time is 14 days from the date of upload.");
-        ImGui.EndDisabled();
-        
-        ImGui.Separator();
-
-        if (string.IsNullOrEmpty(_config.AccessToken))
-        {
+        if (_enableUpload) {
             ImGui.BeginDisabled(!_enableUpload);
-            ImGui.TextUnformatted("Register with:");
+            ImGui.TextUnformatted("Enable Quick Upload:");
             ImGui.SameLine();
-            if (ImGui.Button($"Discord##cf_register_discord"))
-            {
-                _registerModal.Begin();
-            }
-        
-            ImGui.TextUnformatted("Log in with:");
+            ImGui.Checkbox("##cf_quick_upload", ref _enableQuickUpload);
             ImGui.SameLine();
-            if (ImGui.Button($"Discord##cf_login_discord"))
+            ImGuiComponents.HelpMarker("Quick Upload allows you to bypass the upload user interface and perform uploads " +
+                                    "in one click by holding Left Shift when clicking upload. The entire upload process " +
+                                    "will run in the background and use your default privacy settings. If all opcodes are " +
+                                    "not available for censoring, the warning will not appear, and the upload will continue.");
+            ImGui.EndDisabled();
+
+            ImGui.BeginDisabled(!_enableUpload);
+            ImGui.TextUnformatted("Default metrics time for uploads: ");
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker("The 'metrics time' is how long from the time of upload that it will take for your captures to appear in " +
+                                    "the Chronofoil metrics system for developers to query. This does not prevent an individual from querying " +
+                                    "the metrics system and recreating your capture, but it makes it incredibly difficult, while still providing " +
+                                    "useful information to developers. This setting is your default time and will be set automatically for uploads," +
+                                    " but can be overridden at upload time.");
+            ImGui.BeginDisabled(_metricsWhenEos);
+            ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
+            ImGui.InputInt("##cf_metric_time_value", ref _metricsTimeValue);
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
+            if (ImGui.BeginCombo("##cf_metric_time_identifier", _metricsTimeSpan.ToString()))
             {
-                _loginModal.Begin();
+                foreach (var tsId in Enum.GetValues<TimeSpanIdentifier>())
+                    if (ImGui.Selectable(tsId.ToString()))
+                        _metricsTimeSpan = tsId;
+                ImGui.EndCombo();
             }
             ImGui.EndDisabled();
-        }
-        else
-        {
-            var (userName, provider) = JwtReader.GetTokenInfo(_config.AccessToken);
-            ImGui.TextUnformatted($"Authenticated as {userName} via {provider}.");
+            ImGui.SameLine();
+            ImGui.Checkbox("Do not add my captures to the metrics system until FFXIV is End of Service##cf_metric_time_eos", ref _metricsWhenEos);
+            if (!_metricsTimeValid)
+                ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Metrics time is 7 days from the date of upload.");
 
-            if (ImGui.Button("Log out##cf_logout"))
+            ImGui.TextUnformatted("Default 'public' time for uploads: ");
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker("The 'public time' is how long from the time of upload that it will take for your captures to be" +
+                                    " available for raw download. This provides the full capture file to individuals, which allows them to do" +
+                                    " whatever - extract information, places visited, or even replay the packet capture on their own machine " +
+                                    "if they have that capability. This setting is your default time and will be set automatically for uploads, " +
+                                    "but can be overridden at upload time");
+            ImGui.BeginDisabled(_publicWhenEos);
+            ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
+            ImGui.InputInt("##cf_public_time_value", ref _publicTimeValue);
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(ImGuiHelpers.GlobalScale * 150f);
+            if (ImGui.BeginCombo("##cf_public_time_identifier", _publicTimeSpan.ToString()))
             {
-                // TODO: Logout popup modal?
-                _config.AccessToken = "";
-                _config.RefreshToken = "";
-                _config.TokenExpiryTime = DateTime.UnixEpoch;
-                _config.Save();
+                foreach (var tsId in Enum.GetValues<TimeSpanIdentifier>())
+                    if (ImGui.Selectable(tsId.ToString()))
+                        _publicTimeSpan = tsId;
+                ImGui.EndCombo();
+            }
+            ImGui.EndDisabled();
+            ImGui.SameLine();
+            ImGui.Checkbox("Do not make my captures public until FFXIV is End of Service##cf_public_time_eos", ref _publicWhenEos);
+            if (!_publicTimeValid)
+                ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Public time is 14 days from the date of upload.");
+            ImGui.EndDisabled();
+
+            ImGui.Separator();
+
+            if (string.IsNullOrEmpty(_config.AccessToken))
+            {
+                ImGui.BeginDisabled(!_enableUpload);
+                ImGui.TextUnformatted("Register with:");
+                ImGui.SameLine();
+                if (ImGui.Button($"Discord##cf_register_discord"))
+                {
+                    _registerModal.Begin();
+                }
+
+                ImGui.TextUnformatted("Log in with:");
+                ImGui.SameLine();
+                if (ImGui.Button($"Discord##cf_login_discord"))
+                {
+                    _loginModal.Begin();
+                }
+                ImGui.EndDisabled();
+            }
+            else
+            {
+                var (userName, provider) = JwtReader.GetTokenInfo(_config.AccessToken);
+                ImGui.TextUnformatted($"Authenticated as {userName} via {provider}.");
+
+                if (ImGui.Button("Log out##cf_logout"))
+                {
+                    // TODO: Logout popup modal?
+                    _config.AccessToken = "";
+                    _config.RefreshToken = "";
+                    _config.TokenExpiryTime = DateTime.UnixEpoch;
+                    _config.Save();
+                }
             }
         }
         
