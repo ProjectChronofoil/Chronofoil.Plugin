@@ -68,7 +68,7 @@ public class Plugin : IDalamudPlugin
 				})
 				.ConfigureHttpClient(c =>
 				{
-					c.BaseAddress = new Uri("https://cf-stg.perchbird.dev");
+					c.BaseAddress = new Uri("https://cf.perchbird.dev");
 					var version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 					var header = new ProductInfoHeaderValue("Chronofoil.Plugin", version);
 					c.DefaultRequestHeaders.UserAgent.Add(header);
