@@ -18,8 +18,7 @@ public class AuthManager : IDisposable
         Register,
         Login,
     }
-    // private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237235845736562728&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
-    private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237782923227299923&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
+    private const string LoginUri = "https://discord.com/oauth2/authorize?client_id=1237235845736562728&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A43595%2Fauth%2Flogin%2Fdiscord&scope=identify";
     
     private readonly IPluginLog _log;
     private readonly INotificationManager _notificationManager;
@@ -78,7 +77,7 @@ public class AuthManager : IDisposable
             if (DateTime.UtcNow.AddHours(12) < _config.TokenExpiryTime)
             {
                 _log.Verbose("[AuthManager] [RefreshToken] Refresh is not urgent, so not resetting auth.");
-                return;
+                return true;
             }
             
             _config.AccessToken = "";
