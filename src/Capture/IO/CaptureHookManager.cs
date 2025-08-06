@@ -280,7 +280,7 @@ public unsafe class CaptureHookManager : IDisposable
             // _log.Debug($"packet: type {pktHdr.Type}, {pktHdr.Size} bytes, {proto} {direction}, {pktHdr.SrcEntity} -> {pktHdr.DstEntity}");
             
             var pktData = data.Slice(offset + pktHdrSize, (int)pktHdr.Size - pktHdrSize);
-            var pktOpcode = BitConverter.ToUInt16(pktData[2..5]);
+            var pktOpcode = OpcodeUtility.GetOpcodeFromPacketAtIpcStart(pktData);
 
             // The server sends a keepalive packet to the client right after connection, indicating a new connection
             var isNetworkInit = proto == Protocol.Lobby && direction == Direction.Rx && pktHdr.Type is PacketType.KeepAlive;
@@ -326,7 +326,8 @@ public unsafe class CaptureHookManager : IDisposable
 	            var pos = _buffer.Size;
 	            _buffer.Write(pktData);
 	            var slice = _buffer.Get(pos, pktData.Length);
-	            _unscrambler.Unscramble(slice, _keyGenerator.Keys[0], _keyGenerator.Keys[1], _keyGenerator.Keys[2]);
+	            var opcodeBasedKey = _keyGenerator.GetOpcodeBasedKey(pktOpcode);
+	            _unscrambler.Unscramble(slice, _keyGenerator.Keys[0], _keyGenerator.Keys[1], _keyGenerator.Keys[2], opcodeBasedKey);
             }
             else
             {
