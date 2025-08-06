@@ -24,7 +24,7 @@ public unsafe class CaptureHookManager : IDisposable
 	private const string LobbyKeySignature = "C7 46 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 3B F3";
 	// private const string NetworkInitSignature = "E8 ?? ?? ?? ?? 48 8D 4C 24 ?? E8 ?? ?? ?? ?? 48 8D 8C 24 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 8F";
 	private const string GenericRxSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
-	private const string GenericTxSignature = "40 57 41 56 48 83 EC 38 48 8B F9 4C 8B F2";
+	private const string GenericTxSignature = "40 53 56 48 83 EC 38 48 8B D9 48 8B F2 8B";
 	private const string LobbyTxSignature = "40 53 48 83 EC 20 44 8B 41 28";
 
 	public delegate void NetworkInitializedDelegate();

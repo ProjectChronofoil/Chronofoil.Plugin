@@ -14,7 +14,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Chronofoil.UI.Components;
@@ -157,7 +157,7 @@ public class UploadModal : Window
 		var startString = captureStart?.ToString(CultureInfo.InvariantCulture);
         var endString = captureEnd?.ToString(CultureInfo.InvariantCulture);
         
-        ImGuiHelpers.SafeTextWrapped($"Preparing to upload capture {_captureId}:");
+        ImGui.TextWrapped($"Preparing to upload capture {_captureId}:");
 
         ImGui.Indent(10f);
         ImGui.TextUnformatted($"Start: {startString}");
@@ -193,7 +193,7 @@ public class UploadModal : Window
         ImGui.EndDisabled();
         ImGui.Checkbox("Do not add this capture to the metrics system until FFXIV is End of Service##cf_metric_time_eos", ref _metricsWhenEos);
         if (!_metricsTimeValid)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Metrics time is 7 days from the date of upload.");
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Metrics time is 7 days from the date of upload.");
         
         ImGui.TextUnformatted("Public time for this capture: ");
         ImGui.SameLine();
@@ -217,7 +217,7 @@ public class UploadModal : Window
         ImGui.EndDisabled();
         ImGui.Checkbox("Do not make this capture public until FFXIV is End of Service##cf_public_time_eos", ref _publicWhenEos);
         if (!_publicTimeValid)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Public time is 14 days from the date of upload.");
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Public time is 14 days from the date of upload.");
         ImGui.EndDisabled();
 
         var metricTimeValue = Util.GetTime(_now, _metricsTimeValue, _metricsTimeSpan);
@@ -284,12 +284,12 @@ public class UploadModal : Window
 
     private void DrawCensorNotice()
     {
-        ImGuiHelpers.SafeTextWrapped($"Some sensitive packet opcodes that Chronofoil censors are not available from your client or the server.");
-        ImGuiHelpers.SafeTextWrapped($"What this means is that nobody on the current game version has performed a certain task (for example, sending a letter) - including you.");
-        ImGuiHelpers.SafeTextWrapped($"Chronofoil tracks these on your game client - if you've sent a censorable packet, Chronofoil will know its opcode and censor it accordingly.");
-        ImGuiHelpers.SafeTextWrapped($"You should be safe to upload, considering if you've performed one of these censorable actions, Chronofoil would know the opcode.");
+        ImGui.TextWrapped($"Some sensitive packet opcodes that Chronofoil censors are not available from your client or the server.");
+        ImGui.TextWrapped($"What this means is that nobody on the current game version has performed a certain task (for example, sending a letter) - including you.");
+        ImGui.TextWrapped($"Chronofoil tracks these on your game client - if you've sent a censorable packet, Chronofoil will know its opcode and censor it accordingly.");
+        ImGui.TextWrapped($"You should be safe to upload, considering if you've performed one of these censorable actions, Chronofoil would know the opcode.");
         ImGui.Dummy(new Vector2(0, 10f));
-        ImGuiHelpers.SafeTextWrapped($"However, you can opt to not upload now and try again later when all censorable opcodes are known.");
+        ImGui.TextWrapped($"However, you can opt to not upload now and try again later when all censorable opcodes are known.");
 
         if (ImGui.Button($"Cancel##cf_upload_censornotice_cancel"))
         {
@@ -375,9 +375,9 @@ public class UploadModal : Window
 
     private void DrawError()
     {
-        ImGuiHelpers.SafeTextWrapped("Chronofoil encountered an error while uploading the capture.");
-        ImGuiHelpers.SafeTextWrapped("The error is as follows:");
-        ImGui.InputTextMultiline("##cf_upload_error", ref _errorText, (uint)_errorText.Length, _boxSize, ImGuiInputTextFlags.ReadOnly);
+        ImGui.TextWrapped("Chronofoil encountered an error while uploading the capture.");
+        ImGui.TextWrapped("The error is as follows:");
+        ImGui.InputTextMultiline("##cf_upload_error", ref _errorText, _errorText.Length, _boxSize, ImGuiInputTextFlags.ReadOnly);
 
         if (ImGui.Button("Ok##cf_upload_error_ok"))
         {
@@ -391,7 +391,7 @@ public class UploadModal : Window
 
         var response = _response.Result;
 
-        ImGuiHelpers.SafeTextWrapped($"Your capture {response.CaptureId} will be available at the following times:");
+        ImGui.TextWrapped($"Your capture {response.CaptureId} will be available at the following times:");
         ImGui.TextUnformatted($"Metrics: {Util.GetTimeString(response.MetricTime, response.MetricWhenEos)}");
         ImGui.TextUnformatted($"Public: {Util.GetTimeString(response.PublicTime, response.PublicWhenEos)}");
         ImGui.TextUnformatted("");

@@ -3,7 +3,7 @@ using Chronofoil.Common.Info;
 using Chronofoil.Utility;
 using Chronofoil.Web.Info;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;
 
@@ -26,6 +26,6 @@ public class FaqTab
         
         foreach (var qa in _infoService.GetFaq().Entries)
             if (ImGui.CollapsingHeader(qa.Question))
-                ImGuiHelpers.SafeTextWrapped(qa.Answer);
+                ImGui.TextWrapped(qa.Answer);
     }
 }

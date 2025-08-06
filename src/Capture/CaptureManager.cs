@@ -154,7 +154,7 @@ public class CaptureManager
         var dir = Directory.GetParent(StatePath)!.FullName;
         if (!Directory.Exists(dir))
             Directory.CreateDirectory(dir);
-        Dalamud.Utility.Util.WriteAllTextSafe(StatePath, text);
+        Dalamud.Utility.FilesystemUtil.WriteAllTextSafe(StatePath, text);
     }
 
     public void StartCapture(Guid captureId, DateTime startTime)

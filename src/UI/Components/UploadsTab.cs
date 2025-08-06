@@ -10,7 +10,7 @@ using Chronofoil.Utility;
 using Chronofoil.Web;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;
 

@@ -8,7 +8,7 @@ using Chronofoil.Utility;
 using Chronofoil.Web;
 using Chronofoil.Web.Upload;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;
 

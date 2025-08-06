@@ -3,7 +3,7 @@ using Chronofoil.Web.Auth;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Chronofoil.UI.Components;
@@ -66,14 +66,14 @@ public class LoginModal : Window, IAuthListener
 
     private void DrawAuth()
     {
-        ImGuiHelpers.SafeTextWrapped("Please authorize the application with Discord in your web browser.");
+        ImGui.TextWrapped("Please authorize the application with Discord in your web browser.");
     }
 
     private void DrawError()
     {
-        ImGuiHelpers.SafeTextWrapped("Chronofoil encountered an error during login.");
-        ImGuiHelpers.SafeTextWrapped("The error is as follows:");
-        ImGui.InputTextMultiline("##cf_login_error", ref _errorText, (uint)_errorText.Length, _boxSize, ImGuiInputTextFlags.ReadOnly);
+        ImGui.TextWrapped("Chronofoil encountered an error during login.");
+        ImGui.TextWrapped("The error is as follows:");
+        ImGui.InputTextMultiline("##cf_login_error", ref _errorText, _errorText.Length, _boxSize, ImGuiInputTextFlags.ReadOnly);
 
         if (ImGui.Button("Ok##cf_login_error_ok"))
         {
@@ -83,7 +83,7 @@ public class LoginModal : Window, IAuthListener
 
     private void DrawDone()
     {
-        ImGuiHelpers.SafeTextWrapped("Authentication with the Chronofoil server was successful!");
+        ImGui.TextWrapped("Authentication with the Chronofoil server was successful!");
 
         if (ImGui.Button("Done##cf_login_modal_done"))
         {

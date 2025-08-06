@@ -8,7 +8,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Chronofoil.UI.Components;
@@ -106,14 +106,14 @@ public class NewTosModal : Window
 
     private void DrawTos()
     {
-        ImGuiHelpers.SafeTextWrapped("Please read and accept the new Chronofoil Terms of Service.");
+        ImGui.TextWrapped("Please read and accept the new Chronofoil Terms of Service.");
         if (_tos.EnactedDate != default)
-            ImGuiHelpers.SafeTextWrapped($"Effective date: {_tos.EnactedDate}");
+            ImGui.TextWrapped($"Effective date: {_tos.EnactedDate}");
 
         using (var _ = ImRaii.PushFont(UiBuilder.MonoFont))
         {
             var text = _tos.Text;
-            ImGui.InputTextMultiline("##cf_tos", ref text, (uint)text.Length, BoxSize, ImGuiInputTextFlags.ReadOnly);   
+            ImGui.InputTextMultiline("##cf_tos", ref text, text.Length, BoxSize, ImGuiInputTextFlags.ReadOnly);   
         }
         
         ImGui.Separator();
@@ -147,9 +147,9 @@ public class NewTosModal : Window
 
     private void DrawError()
     {
-        ImGuiHelpers.SafeTextWrapped("Chronofoil encountered an error during registration.");
-        ImGuiHelpers.SafeTextWrapped("The error is as follows:");
-        ImGui.InputTextMultiline("##cf_new_tos_error", ref _errorText, (uint)_errorText.Length, BoxSize, ImGuiInputTextFlags.ReadOnly);
+        ImGui.TextWrapped("Chronofoil encountered an error during registration.");
+        ImGui.TextWrapped("The error is as follows:");
+        ImGui.InputTextMultiline("##cf_new_tos_error", ref _errorText, _errorText.Length, BoxSize, ImGuiInputTextFlags.ReadOnly);
 
         if (ImGui.Button("Ok##cf_new_tos_error_ok"))
         {
@@ -160,7 +160,7 @@ public class NewTosModal : Window
 
     private void DrawDone()
     {
-        ImGuiHelpers.SafeTextWrapped($"Thank you for accepting the new Chronofoil Terms of Service (effective {_tos.EnactedDate.ToLocalTime()}).");
+        ImGui.TextWrapped($"Thank you for accepting the new Chronofoil Terms of Service (effective {_tos.EnactedDate.ToLocalTime()}).");
 
         if (ImGui.Button("Done##cf_new_tos_modal_done"))
         {

@@ -205,7 +205,7 @@ internal class OpcodeStore
     public void Save()
     {
         var text = JsonConvert.SerializeObject(this);
-        Dalamud.Utility.Util.WriteAllTextSafe(_path, text);
+        Dalamud.Utility.FilesystemUtil.WriteAllTextSafe(_path, text);
     }
     
     public void AddOpcode(string gameVersion, KnownCensoredOpcode opcodeType, int value)

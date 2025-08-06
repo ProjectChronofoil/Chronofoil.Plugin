@@ -3,7 +3,7 @@ using Chronofoil.Utility;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;
 
@@ -167,7 +167,7 @@ public class SettingsTab
             ImGui.SameLine();
             ImGui.Checkbox("Do not add my captures to the metrics system until FFXIV is End of Service##cf_metric_time_eos", ref _metricsWhenEos);
             if (!_metricsTimeValid)
-                ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Metrics time is 7 days from the date of upload.");
+                ImGui.TextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Metrics time is 7 days from the date of upload.");
 
             ImGui.TextUnformatted("Default 'public' time for uploads: ");
             ImGui.SameLine();
@@ -192,7 +192,7 @@ public class SettingsTab
             ImGui.SameLine();
             ImGui.Checkbox("Do not make my captures public until FFXIV is End of Service##cf_public_time_eos", ref _publicWhenEos);
             if (!_publicTimeValid)
-                ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Public time is 14 days from the date of upload.");
+                ImGui.TextColoredWrapped(ImGuiColors.DalamudRed, "The minimum Public time is 14 days from the date of upload.");
             ImGui.EndDisabled();
 
             ImGui.Separator();
@@ -239,7 +239,7 @@ public class SettingsTab
         ImGui.EndDisabled();
         if (!IsValid)
         {
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudRed, "Settings are invalid.");
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudRed, "Settings are invalid.");
         }
     }
 

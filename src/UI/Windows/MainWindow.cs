@@ -3,7 +3,7 @@ using System.Reflection;
 using Chronofoil.UI.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Windows;
 
