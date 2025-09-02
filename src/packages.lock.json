@@ -101,6 +101,12 @@
         "resolved": "3.1.11",
         "contentHash": "JfPLyigLthuE50yi6tMt7Amrenr/fA31t2CvJyhy/kQmfulIBAqo5T/YFUSRHtuYPXRSaUHygFeh6Qd933EoSw=="
       },
+      "Unscrambler.XIV": {
+        "type": "Direct",
+        "requested": "[7.31.0, )",
+        "resolved": "7.31.0",
+        "contentHash": "VN5c9EZZu3b+xhjT4aiaZ448hIMmFgA26lFSYuCZbuxuJJ4TOiBSTCITej4OFgYf4vvV4wNLoXtt+gaBDyGUJA=="
+      },
       "Google.Protobuf": {
         "type": "Transitive",
         "resolved": "3.31.1",
