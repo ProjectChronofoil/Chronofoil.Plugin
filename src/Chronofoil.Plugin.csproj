@@ -41,7 +41,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
-    <PackageReference Include="Unscrambler.XIV" Version="7.31.0" />
+    <PackageReference Include="Unscrambler.XIV" Version="7.31.1" />
     <Reference Include="SharpDX.Direct3D11">
       <HintPath>$(DalamudLibPath)SharpDX.Direct3D11.dll</HintPath>
       <Private>false</Private>
