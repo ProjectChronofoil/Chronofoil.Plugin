@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 using Chronofoil.Capture.Session;
 using Dalamud.Game;
 using Dalamud.Plugin.Services;
-using SharpDX.Direct3D11;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using TerraFX.Interop.DirectX;
+using TerraFX.Interop.Windows;
+using static TerraFX.Interop.DirectX.DirectX;
+using static TerraFX.Interop.DirectX.DXGI;
+using static TerraFX.Interop.DirectX.D3D11;
 
 namespace Chronofoil.Capture.Context;
 
@@ -94,31 +98,40 @@ public unsafe class ContextManager : IDisposable
         var gameSwapChain = gameDevice->SwapChain;
         if (gameSwapChain == null) return;
 
-        var device = new SharpDX.Direct3D11.Device((nint)gameDevice->D3D11Forwarder);
-        var deviceContext = device.ImmediateContext;
-        var swapChain = new SharpDX.DXGI.SwapChain((nint)gameSwapChain->DXGISwapChain);
+        var device = (ID3D11Device*)gameDevice->D3D11Forwarder;
+        ID3D11DeviceContext* deviceContext;
+        device->GetImmediateContext(&deviceContext);
+        var swapChain = (IDXGISwapChain*)gameSwapChain->DXGISwapChain;
 
         _lastCtx = ms;
         var captureMs = (ulong)DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-        using var backbuffer = swapChain.GetBackBuffer<Texture2D>(0);
-        var width = backbuffer.Description.Width;
-        var height = backbuffer.Description.Height;
-        using var stagingTexture = GraphicsHelper.CreateStagingTexture(device, width, height);
+        ID3D11Texture2D* backbuffer;
+        var iid = IID.IID_ID3D11Texture2D;
+        swapChain->GetBuffer(0, &iid, (void**)&backbuffer);
 
-        using var rt = new RenderTargetView(device, backbuffer);
-        using var res = rt.Resource;
-        deviceContext.CopyResource(res, stagingTexture);
-        var dataBox = deviceContext.MapSubresource(stagingTexture, 0, MapMode.Read, MapFlags.None);
+        D3D11_TEXTURE2D_DESC backbufferDesc;
+        backbuffer->GetDesc(&backbufferDesc);
+        var width = (int)backbufferDesc.Width;
+        var height = (int)backbufferDesc.Height;
 
-        var rowPitch = dataBox.RowPitch;
-        var slicePitch = dataBox.SlicePitch;
+        var stagingTexture = GraphicsHelper.CreateStagingTexture(device, width, height);
+
+        deviceContext->CopyResource((ID3D11Resource*)stagingTexture, (ID3D11Resource*)backbuffer);
+
+        D3D11_MAPPED_SUBRESOURCE mappedResource;
+        deviceContext->Map((ID3D11Resource*)stagingTexture, 0, D3D11_MAP.D3D11_MAP_READ, 0, &mappedResource);
+
+        var rowPitch = (int)mappedResource.RowPitch;
+        var slicePitch = (int)mappedResource.DepthPitch;
+        if (slicePitch == 0)
+            slicePitch = rowPitch * height;
 
         try
         {
             lock (_contextContainer)
             {
-                var imageData = new Span<byte>((void*)dataBox.DataPointer, slicePitch);
+                var imageData = new Span<byte>(mappedResource.pData, slicePitch);
                 _contextContainer.LoadImageData(imageData, width, height, rowPitch);
                 _contextContainer.CaptureTime = captureMs;
             }
@@ -131,7 +144,10 @@ public unsafe class ContextManager : IDisposable
         }
         finally
         {
-            deviceContext?.UnmapSubresource(stagingTexture, 0);
+            deviceContext->Unmap((ID3D11Resource*)stagingTexture, 0);
+            stagingTexture->Release();
+            backbuffer->Release();
+            deviceContext->Release();
             _presentHook?.Original(ptr);
         }
     }
@@ -194,31 +210,28 @@ internal class ContextContainer
     }
 }
 
-public static class GraphicsHelper
+public static unsafe class GraphicsHelper
 {
-    public static Texture2D CreateStagingTexture(SharpDX.DXGI.Device device, int width, int height)
-    {
-        var nDevice = new Device(device.NativePointer);
-        return CreateStagingTexture(nDevice, width, height);
-    }
-
-    public static Texture2D CreateStagingTexture(Device device, int width, int height)
+    public static ID3D11Texture2D* CreateStagingTexture(ID3D11Device* device, int width, int height)
     {
         // For handling of staging resource see
         // http://msdn.microsoft.com/en-US/Library/Windows/Desktop/FF476259(v=vs.85).aspx
-        var textureDescription = new Texture2DDescription
+        var textureDescription = new D3D11_TEXTURE2D_DESC
         {
-            Width = width,
-            Height = height,
+            Width = (uint)width,
+            Height = (uint)height,
             MipLevels = 1,
             ArraySize = 1,
-            Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
-            Usage = ResourceUsage.Staging,
-            SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
-            BindFlags = BindFlags.None,
-            CpuAccessFlags = CpuAccessFlags.Read,
-            OptionFlags = ResourceOptionFlags.None,
+            Format = DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM,
+            Usage = D3D11_USAGE.D3D11_USAGE_STAGING,
+            SampleDesc = new DXGI_SAMPLE_DESC { Count = 1, Quality = 0 },
+            BindFlags = 0,
+            CPUAccessFlags = (uint)D3D11_CPU_ACCESS_FLAG.D3D11_CPU_ACCESS_READ,
+            MiscFlags = 0,
         };
-        return new Texture2D(device, textureDescription);
+
+        ID3D11Texture2D* stagingTexture;
+        device->CreateTexture2D(&textureDescription, null, &stagingTexture);
+        return stagingTexture;
     }
 }
