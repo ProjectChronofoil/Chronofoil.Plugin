@@ -4,9 +4,9 @@
     "net10.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[14.0.0, )",
-        "resolved": "14.0.0",
-        "contentHash": "9c1q/eAeAs82mkQWBOaCvbt3GIQxAIadz5b/7pCXDIy9nHPtnRc+tDXEvKR+M36Wvi7n+qBTevRupkLUQp6DFA=="
+        "requested": "[14.0.1, )",
+        "resolved": "14.0.1",
+        "contentHash": "y0WWyUE6dhpGdolK3iKgwys05/nZaVf4ZPtIjpLhJBZvHxkkiE23zYRo7K7uqAgoK/QvK5cqF6l3VG5AbgC6KA=="
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
@@ -103,9 +103,9 @@
       },
       "Unscrambler.XIV": {
         "type": "Direct",
-        "requested": "[7.40.1, )",
-        "resolved": "7.40.1",
-        "contentHash": "B37B3/I5lE5g9fRISAa74Jnsld4tmY3JzdqJYU+x5ugeJHnv94CeFFIX2wRMZeRz6blZ4DoGbzpqx36sS56z+w=="
+        "requested": "[7.40.1.1, )",
+        "resolved": "7.40.1.1",
+        "contentHash": "HbATsliyY/rdpV+60U4w+1ttgsmys8Zrbbjry3i/HTcZOHla1LX3p23MAvzGNnylDo2TOLyJFxSazoNSWTFCIg=="
       },
       "Google.Protobuf": {
         "type": "Transitive",
