@@ -4,6 +4,7 @@ using Chronofoil.Common;
 using Chronofoil.Common.Auth;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
@@ -101,7 +102,7 @@ public class AuthManager : IDisposable
         _server = CreateWebServer();
         _server.Start();
         _type = AuthType.Register;
-        Dalamud.Utility.Util.OpenLink(LoginUri);
+        Util.OpenLink(LoginUri);
     }
     
     public void Login(IAuthListener listener)
@@ -110,7 +111,7 @@ public class AuthManager : IDisposable
         _server = CreateWebServer();
         _server.Start();
         _type = AuthType.Login;
-        Dalamud.Utility.Util.OpenLink(LoginUri);
+        Util.OpenLink(LoginUri);
     }
     
     public void AuthCallback(string authCode)

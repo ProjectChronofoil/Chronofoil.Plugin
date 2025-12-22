@@ -7,6 +7,7 @@ using Chronofoil.Capture.Session;
 using Chronofoil.CaptureFile;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using Newtonsoft.Json;
 
 namespace Chronofoil.Capture;
@@ -154,7 +155,7 @@ public class CaptureManager
         var dir = Directory.GetParent(StatePath)!.FullName;
         if (!Directory.Exists(dir))
             Directory.CreateDirectory(dir);
-        Dalamud.Utility.FilesystemUtil.WriteAllTextSafe(StatePath, text);
+        FilesystemUtil.WriteAllTextSafe(StatePath, text);
     }
 
     public void StartCapture(Guid captureId, DateTime startTime)

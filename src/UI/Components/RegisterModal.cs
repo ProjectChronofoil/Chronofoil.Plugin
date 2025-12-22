@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Chronofoil.Common.Info;
 using Chronofoil.Web.Auth;
 using Chronofoil.Web.Info;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Chronofoil.UI.Components;

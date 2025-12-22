@@ -5,13 +5,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Chronofoil.CaptureFile.Censor;
 using Chronofoil.Common.Censor;
-using Chronofoil.Utility;
 using Chronofoil.Web;
-using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using Newtonsoft.Json;
+using Util = Chronofoil.Utility.Util;
 
 namespace Chronofoil.Censor;
 
@@ -205,7 +205,7 @@ internal class OpcodeStore
     public void Save()
     {
         var text = JsonConvert.SerializeObject(this);
-        Dalamud.Utility.FilesystemUtil.WriteAllTextSafe(_path, text);
+        FilesystemUtil.WriteAllTextSafe(_path, text);
     }
     
     public void AddOpcode(string gameVersion, KnownCensoredOpcode opcodeType, int value)

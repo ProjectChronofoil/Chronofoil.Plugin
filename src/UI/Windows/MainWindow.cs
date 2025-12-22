@@ -1,9 +1,9 @@
 ﻿using System.Numerics;
 using System.Reflection;
 using Chronofoil.UI.Components;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Windows;
 

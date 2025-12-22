@@ -1,9 +1,9 @@
 ﻿using System;
 using Chronofoil.Web.Auth;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Chronofoil.UI.Components;

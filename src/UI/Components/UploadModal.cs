@@ -9,12 +9,12 @@ using Chronofoil.Censor;
 using Chronofoil.Common.Capture;
 using Chronofoil.Utility;
 using Chronofoil.Web.Upload;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Chronofoil.UI.Components;

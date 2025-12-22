@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Dalamud.Game.Command;
 using Chronofoil.UI;
 using Chronofoil.UI.Components;
 using Chronofoil.Utility;
 using Chronofoil.Web.Auth;
 using Chronofoil.Web.Upload;
-using Dalamud.Interface.Textures;
+using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 
 namespace Chronofoil;

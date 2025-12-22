@@ -17,7 +17,6 @@ using Chronofoil.Web;
 using Chronofoil.Web.Auth;
 using Chronofoil.Web.Info;
 using Chronofoil.Web.Upload;
-using Dalamud.Game;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;

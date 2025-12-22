@@ -1,9 +1,9 @@
 ﻿using System;
 using Chronofoil.Utility;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
-using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;
 

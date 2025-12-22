@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using Chronofoil.CaptureFile;
 using Chronofoil.CaptureFile.Binary.Packet;
 using Chronofoil.CaptureFile.Generated;
-using Dalamud.Hooking;
 using Chronofoil.Lobby;
 using Chronofoil.Utility;
-using Dalamud.Game;
+using Dalamud.Hooking;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 using Unscrambler;

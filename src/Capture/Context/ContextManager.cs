@@ -2,18 +2,15 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Dalamud.Hooking;
 using System.Threading.Tasks;
 using Chronofoil.Capture.Session;
-using Dalamud.Game;
+using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using TerraFX.Interop.DirectX;
 using TerraFX.Interop.Windows;
-using static TerraFX.Interop.DirectX.DirectX;
-using static TerraFX.Interop.DirectX.DXGI;
-using static TerraFX.Interop.DirectX.D3D11;
 
 namespace Chronofoil.Capture.Context;
 
@@ -93,7 +90,7 @@ public unsafe class ContextManager : IDisposable
             return;
         }
 
-        var gameDevice = FFXIVClientStructs.FFXIV.Client.Graphics.Kernel.Device.Instance();
+        var gameDevice = Device.Instance();
         if (gameDevice == null) return;
         var gameSwapChain = gameDevice->SwapChain;
         if (gameSwapChain == null) return;

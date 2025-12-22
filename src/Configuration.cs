@@ -1,8 +1,8 @@
-﻿using Dalamud.Configuration;
-using Dalamud.Plugin;
-using System;
+﻿using System;
 using System.IO;
 using Chronofoil.Utility;
+using Dalamud.Configuration;
+using Dalamud.Plugin;
 
 namespace Chronofoil;
 

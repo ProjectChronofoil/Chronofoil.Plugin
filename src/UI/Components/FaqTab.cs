@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using Chronofoil.Common.Info;
-using Chronofoil.Utility;
-using Chronofoil.Web.Info;
-using Dalamud.Interface.Utility;
+﻿using Chronofoil.Web.Info;
 using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;

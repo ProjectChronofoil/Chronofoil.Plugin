@@ -8,9 +8,9 @@ using Chronofoil.Capture;
 using Chronofoil.Common.Capture;
 using Chronofoil.Utility;
 using Chronofoil.Web;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 
 namespace Chronofoil.UI.Components;
 

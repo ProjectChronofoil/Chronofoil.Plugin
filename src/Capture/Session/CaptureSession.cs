@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Chronofoil.Capture.IO;
 using Chronofoil.CaptureFile;
 using Chronofoil.CaptureFile.Generated;
 using Dalamud.Plugin.Services;

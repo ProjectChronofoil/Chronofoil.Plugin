@@ -1,4 +1,6 @@
-﻿namespace Chronofoil.Utility;
+﻿using FFXIVClientStructs.FFXIV.Client.System.Framework;
+
+namespace Chronofoil.Utility;
 
 public unsafe struct PacketDispatcher
 {
@@ -15,7 +17,7 @@ public unsafe struct PacketDispatcher
 
     public static PacketDispatcher* GetInstance()
     {
-        var framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
+        var framework = Framework.Instance();
         if (framework == null) return null;
         var nmp = framework->NetworkModuleProxy;
         if (nmp == null) return null;
