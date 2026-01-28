@@ -41,7 +41,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
-    <PackageReference Include="Unscrambler.XIV" Version="7.40.2" />
+    <PackageReference Include="Unscrambler.XIV" Version="7.41.0" />
     <Reference Include="TerraFX.Interop.Windows">
       <HintPath>$(DalamudLibPath)TerraFX.Interop.Windows.dll</HintPath>
       <Private>false</Private>
