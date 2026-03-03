@@ -77,7 +77,7 @@ public class ChronofoilClient
     public bool TryGetCensoredOpcodes(string gameVersion, out CensoredOpcodesResponse censoredOpcodes)
     {
         censoredOpcodes = new CensoredOpcodesResponse();
-        var result = _client.GetOpcodes(_config.AccessToken, gameVersion).Result;
+        var result = _client.GetOpcodes(gameVersion).Result;
         LogResult("GetOpcodes", result.StatusCode);
         ThrowIfFailed(result.StatusCode);
         censoredOpcodes = result.Data!;
