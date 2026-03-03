@@ -103,9 +103,9 @@
       },
       "Unscrambler.XIV": {
         "type": "Direct",
-        "requested": "[7.41.1, )",
-        "resolved": "7.41.1",
-        "contentHash": "IyIGPSl+zoqjJrlf4TQVdpwG02pT8bj0Evg90isRbsQ+4N7WVpzc6sCaPWILdadCd35kW1SQABWiWoSfOhEVYg=="
+        "requested": "[7.45.0, )",
+        "resolved": "7.45.0",
+        "contentHash": "ypOtwyYlof2f/SS8f44m8uHGGkdnjpAD5702WOUKMiVztp0PolM+Xs3h5kRCFCwSzi3SJjbV8RnRRTYnAvMV5Q=="
       },
       "Google.Protobuf": {
         "type": "Transitive",
