@@ -48,7 +48,8 @@ public class AutoUploadService
                 {
                     Type = NotificationType.Warning,
                     Title = "Auto Upload Warning",
-                    Content = "Warning: You have auto-upload enabled, but you are not logged in to the Chronofoil Service."
+                    Content = "Warning: You have auto-upload enabled, but you are not logged in to the Chronofoil Service.",
+                    Minimized = false
                 });
             }
             
